@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ProjectPullsUp
+namespace PullUpsDapper
 {
     internal class Password
     {

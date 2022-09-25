@@ -9,11 +9,11 @@ using Npgsql;
 using System.Linq;
 using Telegram.Bot.Types;
 
-namespace ProjectPullsUp
+namespace PullUpsDapper
 {
     public class User
     {
-        public int IdUser { get; set; }
+        public long IdUser { get; set; }
         public string? Name { get; set; }
 
     }

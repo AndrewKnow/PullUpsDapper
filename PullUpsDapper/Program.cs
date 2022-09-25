@@ -10,7 +10,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 
 
-namespace ProjectPullsUp
+namespace PullUpsDapper
 {
     internal class Program
     {
@@ -47,15 +47,20 @@ namespace ProjectPullsUp
             Console.WriteLine(ErrorMessage);
             return Task.CompletedTask;
         }
-        public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update,
-            CancellationToken cancellationToken)
+        public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
             try
             {
-
                 Message? message = update.Message;
                 var userId = message.From.Id;
                 var name = message.From.FirstName;
+
+
+                UserRepository userRepository = new();
+                var list = userRepository.GetUsers();
+
+                var count = userRepository.GetUsersId(userId);
+
 
                 if (update.Type == UpdateType.Message)
                 {
@@ -63,11 +68,8 @@ namespace ProjectPullsUp
                     {
                         case "/start":
 
-                            int count = User.CheakUserInDB(id);
                             if (count > 0)
                             {
-
-
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     $"{name} подсчитал статус выполенния твоей программы тренировок"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
@@ -75,7 +77,11 @@ namespace ProjectPullsUp
                             }
                             else
                             {
-   
+                                User user = new User();
+                                user.IdUser = userId;
+                                user.Name = name;
+
+                                userRepository.CreateUser(user);
 
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     $"Привет {name} я бот который создаст программу тернировок и запомнит твои достижения, жми:"
