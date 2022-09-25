@@ -59,7 +59,7 @@ namespace PullUpsDapper
                 UserRepository userRepository = new();
                 var list = userRepository.GetUsers();
 
-                var count = userRepository.GetUsersId(userId);
+                var  (level, count) = userRepository.GetUsersId(userId);
 
 
                 if (update.Type == UpdateType.Message)
@@ -68,27 +68,36 @@ namespace PullUpsDapper
                     {
                         case "/start":
 
-                            if (count > 0)
+                            if (level != null && count == 1)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    $"{name} подсчитал статус выполенния твоей программы тренировок"
+                                    @$"{name} подсчитал статус выполенния твоей программы тренировок ""{level}"""
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
                             }
-                            else
+
+                            if (level == null && count == 1)
+                            {
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                    @$"{name}, тебе нужно выбрать уровень тернировок"
+                                    + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
+                                    cancellationToken: cancellationToken);
+                                await RemoveReplyKeboard(botClient, message);
+                                await SendReplyKeboard(botClient, message, 2);
+                            }
+                            else if (level == null && count == 0)
                             {
                                 User user = new User();
                                 user.IdUser = userId;
                                 user.Name = name;
-
                                 userRepository.CreateUser(user);
 
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    $"Привет {name} я бот который создаст программу тернировок и запомнит твои достижения, жми:"
+                                    $"Привет {name}, выбери программу тренировок:"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
                                 await RemoveReplyKeboard(botClient, message);
-                                await SendReplyKeboard(botClient, message, 1);
+                                await SendReplyKeboard(botClient, message, 2);
 
                             }
 
@@ -106,6 +115,15 @@ namespace PullUpsDapper
                         case "📊график":
                             break;
                         case "❌удалить программу":
+                            break;
+                        case "новичок":
+                            userRepository.UpdateUser("Новичок", userId);
+                            break;
+                        case "профи":
+                            userRepository.UpdateUser("Профи", userId);
+                            break;
+                        case "турникмэе":
+                            userRepository.UpdateUser("Профи", userId);
                             break;
                     }
                 }
@@ -142,6 +160,20 @@ namespace PullUpsDapper
                        new[]
                        {
                         new KeyboardButton [] { char.ConvertFromUtf32(0x1F9BE) + "Создать программу тренировок" }
+                       })
+                    {
+
+                        ResizeKeyboard = true
+                    };
+                    break;
+
+                case 2:
+                    replyKeyboardMarkup = new(
+                       new[]
+                       {
+                        new KeyboardButton [] { "Новичок" },
+                        new KeyboardButton [] { "Профи" },
+                        new KeyboardButton [] { "Турникмэн" }
                        })
                     {
 
