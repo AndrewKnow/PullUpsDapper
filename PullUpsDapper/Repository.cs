@@ -14,7 +14,7 @@ namespace PullUpsDapper
     {
         List<User> GetUsers();
         void CreateUser(User user);
-        (string lvl, int count) GetUsersId(long userId);
+        (string lvl, int count, bool programm) GetUsersId(long userId);
         void UpdateUser(string lvl, long userId);
 
     }
@@ -30,14 +30,16 @@ namespace PullUpsDapper
             }
         }
 
-        public (string lvl, int count) GetUsersId(long userId)
+        public (string lvl, int count, bool programm) GetUsersId(long userId)
         {
             ConnString = DBConnection.ConnectionString();
             using (var conn = new NpgsqlConnection(ConnString))
             {
                 string lvl = conn.ExecuteScalar<string>(@"SELECT ""Users"".""level"" FROM  ""Pulls"".""Users""  WHERE ""Users"".""userId"" = " + userId + ";");
                 int count = conn.ExecuteScalar<int>(@"SELECT count(*) FROM  ""Pulls"".""Users""  WHERE ""Users"".""userId"" = " + userId + ";");
-                return (lvl, count);
+                bool programm = conn.ExecuteScalar<bool>(@"SELECT count(*) FROM  ""Pulls"".""UserProgram""  WHERE ""UserProgram"".""userId"" = " + userId + ";");
+
+                return (lvl, count, programm);
             }
         }
         public void CreateUser(User user)
@@ -54,7 +56,7 @@ namespace PullUpsDapper
             ConnString = DBConnection.ConnectionString();
             using (var conn = new NpgsqlConnection(ConnString))
             {
-                var sqlQuery = @"UPDATE ""Pulls"".""Users""  SET ""Users"".""level"" = '" + lvl + @"' WHERE ""Users"".""userId"" = " + userId + ";"; 
+                var sqlQuery = @"UPDATE ""Pulls"".""Users""  SET ""level"" = '" + lvl + @"' WHERE ""Users"".""userId"" = " + userId + ";"; 
                 conn.Execute(sqlQuery);
             }
         }

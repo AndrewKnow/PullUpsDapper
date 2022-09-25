@@ -59,7 +59,7 @@ namespace PullUpsDapper
                 UserRepository userRepository = new();
                 var list = userRepository.GetUsers();
 
-                var  (level, count) = userRepository.GetUsersId(userId);
+                var  (level, count, programm) = userRepository.GetUsersId(userId);
 
 
                 if (update.Type == UpdateType.Message)
@@ -68,15 +68,27 @@ namespace PullUpsDapper
                     {
                         case "/start":
 
-                            if (level != null && count == 1)
+
+                            if (level != null && count == 1 && programm == true)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    @$"{name} подсчитал статус выполенния твоей программы тренировок ""{level}"""
+                                    @$"{name}, твоя программа ""{level}"" можешь проверить свою программу тренирок и зписать результат"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
+  
                             }
 
-                            if (level == null && count == 1)
+                            if (level != null && count == 1 && programm == false)
+                            {
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                    @$"{name}, твоя программа ""{level}"" нажми на ""🦾создать программу тренировок"" чтобы начать тренировки:"
+                                    + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
+                                    cancellationToken: cancellationToken);
+                                await RemoveReplyKeboard(botClient, message);
+                                await SendReplyKeboard(botClient, message, 1);
+                            }
+
+                            if (level == null && count == 1 && programm == false)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     @$"{name}, тебе нужно выбрать уровень тернировок"
@@ -85,7 +97,7 @@ namespace PullUpsDapper
                                 await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 2);
                             }
-                            else if (level == null && count == 0)
+                            else if (level == null && count == 0 && programm == false)
                             {
                                 User user = new User();
                                 user.IdUser = userId;
@@ -122,8 +134,8 @@ namespace PullUpsDapper
                         case "профи":
                             userRepository.UpdateUser("Профи", userId);
                             break;
-                        case "турникмэе":
-                            userRepository.UpdateUser("Профи", userId);
+                        case "турникмэн":
+                            userRepository.UpdateUser("Турникмен", userId);
                             break;
                     }
                 }
@@ -187,7 +199,7 @@ namespace PullUpsDapper
 
         static async Task<Message> RemoveReplyKeboard(ITelegramBotClient botClient, Message message)
         {
-            return await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "💪"
+            return await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "..."
                          , replyMarkup: new ReplyKeyboardRemove());
 
         }
