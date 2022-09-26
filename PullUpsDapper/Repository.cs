@@ -64,23 +64,39 @@ namespace PullUpsDapper
         }
         public void CreateTrainingProgram(string lvl, long userId)
         {
-            TrainingProgram.CreateProgram.CreateLvlProgram(lvl, userId);
+            ConnString = DBConnection.ConnectionString();
+            var list = CreateProgram.CreateLvlProgram(lvl, userId);
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                using (var conn = new NpgsqlConnection(ConnString))
+                {
+                    TrainingProgram program = list[i];
+                    var sqlQuery = "INSERT INTO PROCESS_LOGS VALUES (" 
+                        + program.Id + ", " 
+                        + program.Week +  ", " 
+                        + program.Approach + ", " 
+                        + program.Pulls + ", " 
+                        + program.Date 
+                        + ")";
+                    conn.Execute(sqlQuery);
+                }
+            }
 
 
+            //    public class MyObject
+            //{
+            //    public int A { get; set; }
 
-        //    public class MyObject
-        //{
-        //    public int A { get; set; }
+            //    public string B { get; set; }
+            //}
+            //И предполагая processList = List<MyObject>, что вы хотели бы сделать это
 
-        //    public string B { get; set; }
-        //}
-        //И предполагаяprocessList = List<MyObject>, что вы хотели бы сделать это
-
-        //foreach (var item in processList)
-        //    {
-        //         string processQuery = "INSERT INTO PROCESS_LOGS VALUES (@A, @B)";
-        //            connection.Execute(processQuery, item);
-        //    }
+            //foreach (var item in processList)
+            //    {
+            //         string processQuery = "INSERT INTO PROCESS_LOGS VALUES (@A, @B)";
+            //            connection.Execute(processQuery, item);
+            //    }
 
 
 
