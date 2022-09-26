@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Npgsql;
 using Dapper;
-
+using System.Collections.Generic;
 
 namespace PullUpsDapper
 {
@@ -17,8 +17,7 @@ namespace PullUpsDapper
         (string lvl, int count, bool program) GetUsersId(long userId);
         void UpdateUser(string lvl, long userId);
         void CreateTrainingProgram(string lvl, long userId);
-
-
+        List<UserDayResult> DayStatus(long userId);
     }
     public class UserRepository : IUser
     {
@@ -58,7 +57,7 @@ namespace PullUpsDapper
             ConnString = DBConnection.ConnectionString();
             using (var conn = new NpgsqlConnection(ConnString))
             {
-                var sqlQuery = @"UPDATE ""Pulls"".""Users""  SET ""level"" = '" + lvl + @"' WHERE ""Users"".""userId"" = " + userId + ";"; 
+                var sqlQuery = @"UPDATE ""Pulls"".""Users""  SET ""level"" = '" + lvl + @"' WHERE ""Users"".""userId"" = " + userId + ";";
                 conn.Execute(sqlQuery);
             }
         }
@@ -72,35 +71,36 @@ namespace PullUpsDapper
                 using (var conn = new NpgsqlConnection(ConnString))
                 {
                     TrainingProgram program = list[i];
-                    var sqlQuery = "INSERT INTO PROCESS_LOGS VALUES (" 
-                        + program.Id + ", " 
-                        + program.Week +  ", " 
-                        + program.Approach + ", " 
-                        + program.Pulls + ", " 
-                        + program.Date 
-                        + ")";
+                    var sqlQuery = @"INSERT INTO ""Pulls"".""UserProgram"" (""userId"", ""week"", ""approach"", ""pulls"", ""date"")  VALUES ('"
+                        + program.Id + "', '"
+                        + program.Week + "', '"
+                        + program.Approach + "', '"
+                        + program.Pulls + "', '"
+                        + program.Date
+                        + "')";
                     conn.Execute(sqlQuery);
                 }
             }
+        }
+        public List<UserDayResult> DayStatus(long userId)
+        {
+            ConnString = DBConnection.ConnectionString();
+            var date = DateTime.Now;
+            using (var conn = new NpgsqlConnection(ConnString))
+            {
+                string sqlQuery = @"SELECT ""UserProgram"".""date"", ""UserProgram"".""approach"" , 
+                            ""UserProgram"".""pulls"" FROM  ""Pulls"".""UserProgram""  WHERE ""UserProgram"".""userId"" = " + userId +
+                            @" and ""UserProgram"".""date"" = CAST('" + date + "' as Date);";
 
+                var dayProgram = conn.Query<TrainingProgram>(sqlQuery);
+                List<UserDayResult> userDayResult = new List<UserDayResult>();
 
-            //    public class MyObject
-            //{
-            //    public int A { get; set; }
-
-            //    public string B { get; set; }
-            //}
-            //И предполагая processList = List<MyObject>, что вы хотели бы сделать это
-
-            //foreach (var item in processList)
-            //    {
-            //         string processQuery = "INSERT INTO PROCESS_LOGS VALUES (@A, @B)";
-            //            connection.Execute(processQuery, item);
-            //    }
-
-
-
-
+                foreach (var item in dayProgram)
+                {
+                    userDayResult.Add(new UserDayResult(item.Date, item.Approach, item.Pulls));
+                }
+                return userDayResult;
+            }
         }
     }
 }

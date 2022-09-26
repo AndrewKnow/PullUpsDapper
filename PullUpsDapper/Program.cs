@@ -57,10 +57,11 @@ namespace PullUpsDapper
                 UserRepository userRepository = new();
                 var list = userRepository.GetUsers();
 
-                var  (level, count, program) = userRepository.GetUsersId(userId);
+                
 
                 if (update.Type == UpdateType.Message)
                 {
+                    var (level, count, program) = userRepository.GetUsersId(userId);
                     switch (message.Text.ToLower())
                     {
                         case "/start":
@@ -70,6 +71,8 @@ namespace PullUpsDapper
                                     @$"{name}, твоя программа ""{level}"" можешь проверить свою программу тренирок и зписать результат"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
+                                await RemoveReplyKeboard(botClient, message);
+                                await SendReplyKeboard(botClient, message, 3);
                             }
 
                             if (level != null && count == 1 && program == false)
@@ -129,7 +132,10 @@ namespace PullUpsDapper
                         case "✅oтчёт о выполнении":
 
                             break;
-                        case "💪моя программа":
+                        case "💪моя задача на сегодня":
+
+                            // вывод в список программы тернировок
+                            userRepository.DayStatus(userId);
 
                             break;
                         case "📊график":
@@ -140,14 +146,44 @@ namespace PullUpsDapper
                         case "новичок":
                             userRepository.UpdateUser("Новичок", userId);
 
+                            (level, count, program) = userRepository.GetUsersId(userId);
+
+                            userRepository.CreateTrainingProgram(level, userId);
+                            
+                            await botClient.SendTextMessageAsync(message.Chat,
+                                @$"{name}, твоя программа ""{level}"" начинай тренироваться и зписывай результат"
+                                + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
+                                cancellationToken: cancellationToken);
+                            await RemoveReplyKeboard(botClient, message);
+                            await SendReplyKeboard(botClient, message, 3);
                             break;
                         case "профи":
                             userRepository.UpdateUser("Профи", userId);
 
+                            (level, count, program) = userRepository.GetUsersId(userId);
+
+                            userRepository.CreateTrainingProgram(level, userId);
+
+                            await botClient.SendTextMessageAsync(message.Chat,
+                                @$"{name}, твоя программа ""{level}"" начинай тренироваться и зписывай результат"
+                                + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
+                                cancellationToken: cancellationToken);
+                            await RemoveReplyKeboard(botClient, message);
+                            await SendReplyKeboard(botClient, message, 3);
                             break;
                         case "турникмэн":
                             userRepository.UpdateUser("Турникмен", userId);
 
+                            (level, count, program) = userRepository.GetUsersId(userId);
+
+                            userRepository.CreateTrainingProgram(level, userId);
+
+                            await botClient.SendTextMessageAsync(message.Chat,
+                                @$"{name}, твоя программа ""{level}"" начинай тренироваться и зписывай результат"
+                                + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
+                                cancellationToken: cancellationToken);
+                            await RemoveReplyKeboard(botClient, message);
+                            await SendReplyKeboard(botClient, message, 3);
                             break;
                     }
                 }
@@ -169,7 +205,7 @@ namespace PullUpsDapper
                        {
                             new KeyboardButton [] { char.ConvertFromUtf32(0x1F9BE) + "Создать программу тренировок" },
                             new KeyboardButton [] { char.ConvertFromUtf32(0x2705) + "Отчёт о выполнении"},
-                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F4AA) + "Моя программа" },
+                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F4AA) + "Моя задача на сегодня" },
                             new KeyboardButton [] { char.ConvertFromUtf32(0x1F4CA) + "График" },
                             new KeyboardButton [] { char.ConvertFromUtf32(0x274C) + "Удалить программу" },
                        })
@@ -203,6 +239,22 @@ namespace PullUpsDapper
                         ResizeKeyboard = true
                     };
                     break;
+                case 3:
+                    replyKeyboardMarkup = new(
+                       new[]
+                       {
+                            new KeyboardButton [] { char.ConvertFromUtf32(0x2705) + "Отчёт о выполнении"},
+                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F4AA) + "Моя задача на сегодня" },
+                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F4CA) + "График" },
+                            new KeyboardButton [] { char.ConvertFromUtf32(0x274C) + "Удалить программу" },
+                       })
+                    {
+
+                        ResizeKeyboard = true
+                    };
+                    break;
+
+
             }
             return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
                 text: "Выберите вариант:", replyMarkup: replyKeyboardMarkup);

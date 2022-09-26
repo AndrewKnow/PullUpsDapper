@@ -26,7 +26,6 @@ namespace PullUpsDapper
             while (!f.EndOfStream)
             {
                 Key = f.ReadLine();
-
             }
             f.Close();
             return Key;
