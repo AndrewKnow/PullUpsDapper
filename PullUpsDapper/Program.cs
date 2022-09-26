@@ -6,7 +6,6 @@ using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-
 using Telegram.Bot.Types.ReplyMarkups;
 
 
@@ -55,30 +54,25 @@ namespace PullUpsDapper
                 var userId = message.From.Id;
                 var name = message.From.FirstName;
 
-
                 UserRepository userRepository = new();
                 var list = userRepository.GetUsers();
 
-                var  (level, count, programm) = userRepository.GetUsersId(userId);
-
+                var  (level, count, program) = userRepository.GetUsersId(userId);
 
                 if (update.Type == UpdateType.Message)
                 {
                     switch (message.Text.ToLower())
                     {
                         case "/start":
-
-
-                            if (level != null && count == 1 && programm == true)
+                            if (level != null && count == 1 && program == true)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     @$"{name}, твоя программа ""{level}"" можешь проверить свою программу тренирок и зписать результат"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
-  
                             }
 
-                            if (level != null && count == 1 && programm == false)
+                            if (level != null && count == 1 && program == false)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     @$"{name}, твоя программа ""{level}"" нажми на ""🦾создать программу тренировок"" чтобы начать тренировки:"
@@ -88,7 +82,7 @@ namespace PullUpsDapper
                                 await SendReplyKeboard(botClient, message, 1);
                             }
 
-                            if (level == null && count == 1 && programm == false)
+                            if (level == null && count == 1 && program == false)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     @$"{name}, тебе нужно выбрать уровень тернировок"
@@ -97,7 +91,8 @@ namespace PullUpsDapper
                                 await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 2);
                             }
-                            else if (level == null && count == 0 && programm == false)
+
+                            else if (level == null && count == 0 && program == false)
                             {
                                 User user = new User();
                                 user.IdUser = userId;
@@ -110,32 +105,49 @@ namespace PullUpsDapper
                                     cancellationToken: cancellationToken);
                                 await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 2);
-
                             }
 
                             break;
                         case "/menu":
                             await RemoveReplyKeboard(botClient, message);
                             await SendReplyKeboard(botClient, message, 0);
+
                             break;
                         case "🦾создать программу тренировок":
+                            if (program)
+                            {
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                    @$"{name}, у тебя уже сть программа тернировок ""{level}"""
+                                    + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
+                                    cancellationToken: cancellationToken);
+                            }
+                            else
+                            {
+                                userRepository.CreateTrainingProgram(level, userId);
+                            }
                             break;
                         case "✅oтчёт о выполнении":
+
                             break;
                         case "💪моя программа":
+
                             break;
                         case "📊график":
                             break;
                         case "❌удалить программу":
+
                             break;
                         case "новичок":
                             userRepository.UpdateUser("Новичок", userId);
+
                             break;
                         case "профи":
                             userRepository.UpdateUser("Профи", userId);
+
                             break;
                         case "турникмэн":
                             userRepository.UpdateUser("Турникмен", userId);
+
                             break;
                     }
                 }
@@ -155,12 +167,11 @@ namespace PullUpsDapper
                     replyKeyboardMarkup = new(
                        new[]
                        {
-                        new KeyboardButton [] { char.ConvertFromUtf32(0x1F9BE) + "Создать программу тренировок" },
-                        new KeyboardButton [] { char.ConvertFromUtf32(0x2705) + "Отчёт о выполнении"},
-                        new KeyboardButton [] { char.ConvertFromUtf32(0x1F4AA) + "Моя программа" },
-                        new KeyboardButton [] { char.ConvertFromUtf32(0x1F4CA) + "График" },
-                        new KeyboardButton [] { char.ConvertFromUtf32(0x274C) + "Удалить программу" },
-
+                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F9BE) + "Создать программу тренировок" },
+                            new KeyboardButton [] { char.ConvertFromUtf32(0x2705) + "Отчёт о выполнении"},
+                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F4AA) + "Моя программа" },
+                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F4CA) + "График" },
+                            new KeyboardButton [] { char.ConvertFromUtf32(0x274C) + "Удалить программу" },
                        })
                     {
 
@@ -171,7 +182,7 @@ namespace PullUpsDapper
                     replyKeyboardMarkup = new(
                        new[]
                        {
-                        new KeyboardButton [] { char.ConvertFromUtf32(0x1F9BE) + "Создать программу тренировок" }
+                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F9BE) + "Создать программу тренировок" }
                        })
                     {
 
@@ -183,9 +194,9 @@ namespace PullUpsDapper
                     replyKeyboardMarkup = new(
                        new[]
                        {
-                        new KeyboardButton [] { "Новичок" },
-                        new KeyboardButton [] { "Профи" },
-                        new KeyboardButton [] { "Турникмэн" }
+                            new KeyboardButton [] { "Новичок" },
+                            new KeyboardButton [] { "Профи" },
+                            new KeyboardButton [] { "Турникмэн" }
                        })
                     {
 

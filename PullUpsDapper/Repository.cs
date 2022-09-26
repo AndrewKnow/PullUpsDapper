@@ -14,8 +14,10 @@ namespace PullUpsDapper
     {
         List<User> GetUsers();
         void CreateUser(User user);
-        (string lvl, int count, bool programm) GetUsersId(long userId);
+        (string lvl, int count, bool program) GetUsersId(long userId);
         void UpdateUser(string lvl, long userId);
+        void CreateTrainingProgram(string lvl, long userId);
+
 
     }
     public class UserRepository : IUser
@@ -30,16 +32,16 @@ namespace PullUpsDapper
             }
         }
 
-        public (string lvl, int count, bool programm) GetUsersId(long userId)
+        public (string lvl, int count, bool program) GetUsersId(long userId)
         {
             ConnString = DBConnection.ConnectionString();
             using (var conn = new NpgsqlConnection(ConnString))
             {
                 string lvl = conn.ExecuteScalar<string>(@"SELECT ""Users"".""level"" FROM  ""Pulls"".""Users""  WHERE ""Users"".""userId"" = " + userId + ";");
                 int count = conn.ExecuteScalar<int>(@"SELECT count(*) FROM  ""Pulls"".""Users""  WHERE ""Users"".""userId"" = " + userId + ";");
-                bool programm = conn.ExecuteScalar<bool>(@"SELECT count(*) FROM  ""Pulls"".""UserProgram""  WHERE ""UserProgram"".""userId"" = " + userId + ";");
+                bool program = conn.ExecuteScalar<bool>(@"SELECT count(*) FROM  ""Pulls"".""UserProgram""  WHERE ""UserProgram"".""userId"" = " + userId + ";");
 
-                return (lvl, count, programm);
+                return (lvl, count, program);
             }
         }
         public void CreateUser(User user)
@@ -60,6 +62,29 @@ namespace PullUpsDapper
                 conn.Execute(sqlQuery);
             }
         }
+        public void CreateTrainingProgram(string lvl, long userId)
+        {
+            TrainingProgram.CreateProgram.CreateLvlProgram(lvl, userId);
 
+
+
+        //    public class MyObject
+        //{
+        //    public int A { get; set; }
+
+        //    public string B { get; set; }
+        //}
+        //И предполагаяprocessList = List<MyObject>, что вы хотели бы сделать это
+
+        //foreach (var item in processList)
+        //    {
+        //         string processQuery = "INSERT INTO PROCESS_LOGS VALUES (@A, @B)";
+        //            connection.Execute(processQuery, item);
+        //    }
+
+
+
+
+        }
     }
 }
