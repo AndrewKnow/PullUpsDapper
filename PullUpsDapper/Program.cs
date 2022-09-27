@@ -7,7 +7,7 @@ using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
-
+using System.Text;
 
 namespace PullUpsDapper
 {
@@ -88,7 +88,7 @@ namespace PullUpsDapper
                             if (level == null && count == 1 && program == false)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    @$"{name}, тебе нужно выбрать уровень тернировок"
+                                    @$"{name}, выбери программу тренировокк"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
                                 await RemoveReplyKeboard(botClient, message);
@@ -103,7 +103,7 @@ namespace PullUpsDapper
                                 userRepository.CreateUser(user);
 
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    $"Привет {name}, выбери программу тренировок:"
+                                    $"Привет {name}, выбери программу тренировок"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
                                 await RemoveReplyKeboard(botClient, message);
@@ -133,10 +133,22 @@ namespace PullUpsDapper
 
                             break;
                         case "💪моя задача на сегодня":
-
                             // вывод в список программы тернировок
-                            userRepository.DayStatus(userId);
+                            var userDayResult =  userRepository.DayStatus(userId);
+                            await botClient.SendTextMessageAsync(message.Chat,
+                             $"Дата: {DateTime.Today.ToShortDateString()}\nПодход - Повторения",
+                            cancellationToken: cancellationToken);
 
+                            StringBuilder sb = new StringBuilder();
+
+                            foreach (var item in userDayResult)
+                            {
+                                sb.Append($"{item.Approach} - {item.Pulls}\n");
+                            }
+      
+                            await botClient.SendTextMessageAsync(message.Chat,
+                                sb.ToString(),
+                                cancellationToken: cancellationToken);
                             break;
                         case "📊график":
                             break;
@@ -257,7 +269,7 @@ namespace PullUpsDapper
 
             }
             return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
-                text: "Выберите вариант:", replyMarkup: replyKeyboardMarkup);
+                text: "👇🏻", replyMarkup: replyKeyboardMarkup);
         }
 
         static async Task<Message> RemoveReplyKeboard(ITelegramBotClient botClient, Message message)

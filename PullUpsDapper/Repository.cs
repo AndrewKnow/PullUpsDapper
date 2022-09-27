@@ -92,7 +92,7 @@ namespace PullUpsDapper
                             ""UserProgram"".""pulls"" FROM  ""Pulls"".""UserProgram""  WHERE ""UserProgram"".""userId"" = " + userId +
                             @" and ""UserProgram"".""date"" = CAST('" + date + "' as Date);";
 
-                var dayProgram = conn.Query<TrainingProgram>(sqlQuery);
+                var dayProgram = conn.Query<UserDayResult>(sqlQuery);
                 List<UserDayResult> userDayResult = new List<UserDayResult>();
 
                 foreach (var item in dayProgram)

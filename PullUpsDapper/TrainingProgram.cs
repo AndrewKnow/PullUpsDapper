@@ -31,6 +31,7 @@ namespace PullUpsDapper
         {
             DateTime date = DateTime.Now;
             int pulls;
+            int pullsMax;
             pulls = 0;
             for (int i = 1; i <= 30; i++) // неделя
             {
@@ -40,13 +41,16 @@ namespace PullUpsDapper
                     switch (lvl) // уровень
                     {
                         case "Новичок":
-                            UserProgram.Add(new TrainingProgram(userId, i, j, j <= 2 && j >= 3 ? pulls + 2 : pulls + 1, date));
+                            pullsMax = j > 2 && j <= 4 ? pulls + 2 : pulls + 1;
+                            UserProgram.Add(new TrainingProgram(userId, i, j, pullsMax, date));
                             break;
                         case "Профи":
-                            UserProgram.Add(new TrainingProgram(userId, i, j, j <= 2 && j >= 3 ? pulls + 3 : pulls + 1, date));
+                            pullsMax = j > 2 && j <= 4 ? pulls + 3 : pulls + 1;
+                            UserProgram.Add(new TrainingProgram(userId, i, j, pullsMax, date));
                             break;
                         case "Турникмен":
-                            UserProgram.Add(new TrainingProgram(userId, i, j, j <= 2 && j >= 3 ? pulls + 4 : pulls + 1, date));
+                            pullsMax = j > 2 && j <= 4 ? pulls + 4 : pulls + 1;
+                            UserProgram.Add(new TrainingProgram(userId, i, j, pullsMax, date));
                             break;
                     }
                 }
