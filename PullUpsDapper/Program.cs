@@ -59,7 +59,7 @@ namespace PullUpsDapper
 
                 if (update.Type == UpdateType.Message)
                 {
-                    var (level, count, program) = userRepository.GetUsersId(userId);
+                    var (level, count) = userRepository.GetUsersId(userId);
 
                     if (UserDayProgram.DayReport)
                     {
@@ -161,7 +161,7 @@ namespace PullUpsDapper
                             break;
 
                         case "🦾Создать программу тренировок":
-                            if (program)
+                            if (level != null)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     @$"{name}, у тебя уже сть программа тернировок ""{level}"""
@@ -211,7 +211,7 @@ namespace PullUpsDapper
                         case "Новичок":
                             userRepository.UpdateUser("Новичок", userId);
 
-                            (level, count, program) = userRepository.GetUsersId(userId);
+                            (level, count) = userRepository.GetUsersId(userId);
                             userRepository.CreateTrainingProgram(level, userId);
                             
                             await botClient.SendTextMessageAsync(message.Chat,
@@ -225,7 +225,7 @@ namespace PullUpsDapper
                         case "Профи":
                             userRepository.UpdateUser("Профи", userId);
 
-                            (level, count, program) = userRepository.GetUsersId(userId);
+                            (level, count) = userRepository.GetUsersId(userId);
                             userRepository.CreateTrainingProgram(level, userId);
 
                             await botClient.SendTextMessageAsync(message.Chat,
@@ -239,7 +239,7 @@ namespace PullUpsDapper
                         case "Турникмэн":
                             userRepository.UpdateUser("Турникмен", userId);
 
-                            (level, count, program) = userRepository.GetUsersId(userId);
+                            (level, count) = userRepository.GetUsersId(userId);
                             userRepository.CreateTrainingProgram(level, userId);
 
                             await botClient.SendTextMessageAsync(message.Chat,
@@ -251,9 +251,10 @@ namespace PullUpsDapper
                             break;
 
                         case "Администратор":
-                            userRepository.CreateLevelProgram("Новичок");
-                            userRepository.CreateLevelProgram("Профи");
-                            userRepository.CreateLevelProgram("Турникмэн");
+                            userRepository.CreateLevelProgram();
+                            await botClient.SendTextMessageAsync(message.Chat,
+                            "Я всё сделал хозяин",
+                            cancellationToken: cancellationToken);
                             break;
                     }
                 }

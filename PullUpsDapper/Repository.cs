@@ -14,11 +14,12 @@ namespace PullUpsDapper
     {
         List<User> GetUsers();
         void CreateUser(User user);
-        (string lvl, int count, bool program) GetUsersId(long userId);
+        (string lvl, int count) GetUsersId(long userId);
         void UpdateUser(string lvl, long userId);
         void CreateTrainingProgram(string lvl, long userId);
         List<UserDayProgram> DayStatus(long userId);
         string DayResult(long userId, int pulls);
+        void CreateLevelProgram();
     }
     public class UserRepository : IUser
     {     
@@ -95,16 +96,16 @@ namespace PullUpsDapper
             ConnString = DBConnection.ConnectionString();
             var date = DateTime.Now;
             using var conn = new NpgsqlConnection(ConnString);
-            string sqlQuery = "SELECT b.date, a.approach , a.pulls" +
-                              " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.user_id = b.user_id and a.week = b.week " +
-                              " WHERE a.level = (Select level From pulls.users Where user_id = " + userId + ")  and b.date = CAST('" + date + "' as Date);";
+            string sqlQuery = "SELECT a.approach , a.pulls" +
+                              " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.week = b.week " +
+                              " WHERE a.level = (Select level From pulls.users Where user_id = " + userId + ")::text  and b.date = CAST('" + date + "' as Date);";
 
             var dayProgram = conn.Query<UserDayProgram>(sqlQuery);
             List<UserDayProgram> userDayProgram = new List<UserDayProgram>();
 
             foreach (var item in dayProgram)
             {
-                userDayProgram.Add(new UserDayProgram(item.Date, item.Approach, item.Pulls));
+                userDayProgram.Add(new UserDayProgram(item.Approach, item.Pulls));
             }
             conn.Close();
             return userDayProgram;
@@ -119,7 +120,7 @@ namespace PullUpsDapper
             string sqlQuery;
             sqlQuery = "Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST('" + date + "' as Date)) " +
-                              "and a.level = (Select level From pulls.users Where user_id = " + userId + ");";
+                              "and level = (Select level From pulls.users Where user_id = " + userId + ")::text;";
             int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery);
 
             if (pulls < sumPullsFromProgram)
@@ -142,10 +143,10 @@ namespace PullUpsDapper
             return checkResult;
         }
 
-        public void CreateLevelProgram(string lvl)
+        public void CreateLevelProgram()
         {
             ConnString = DBConnection.ConnectionString();
-            var result = CreateProgram.CreareProgramLevel(lvl);
+            var result = CreateProgram.CreareProgramLevel();
 
             using var conn = new NpgsqlConnection(ConnString);
             for (int i = 0; i < result.Count; i++)
@@ -159,10 +160,6 @@ namespace PullUpsDapper
                     + ")";
                 conn.Execute(sqlQuery); 
             }
-
-
-
         }
-
     }
 }

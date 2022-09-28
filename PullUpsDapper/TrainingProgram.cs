@@ -106,38 +106,36 @@ namespace PullUpsDapper
             return DayResult;
         }
 
-        public static List<LevelProgram> CreareProgramLevel(string lvl)
+        public static List<LevelProgram> CreareProgramLevel()
         {
             DateTime date = DateTime.Now;
-            int pulls;
-            int pullsMax;
-            pulls = 0;
+            int pulls = 0;
+            int pullsLvl1 = 0;
+            int pullsLvl2 = 0;
+            int pullsLvl3 = 0;
             for (int i = 1; i <= 30; i++) // неделя
             {
-                pulls++;
+                pullsLvl1++;
+                pullsLvl2++;
+                pullsLvl3++;
                 for (int j = 1; j <= 6; j++) // подход
                 {
-                    switch (lvl) // уровень
-                    {
-                        case "Новичок":
-                            pullsMax = j > 2 && j <= 4 ? pulls + 2 : pulls + 1;
-                            LevelProgram.Add(new LevelProgram(lvl, i, j, pullsMax));
-                            break;
-                        case "Профи":
-                            pullsMax = j > 2 && j <= 4 ? pulls + 3 : pulls + 1;
-                            LevelProgram.Add(new LevelProgram(lvl, i, j, pullsMax));
-                            break;
-                        case "Турникмен":
-                            pullsMax = j > 2 && j <= 4 ? pulls + 4 : pulls + 1;
-                            LevelProgram.Add(new LevelProgram(lvl, i, j, pullsMax));
-                            break;
-                    }
+                    pulls = pullsLvl1;
+                    //pullsLvl1 = j > 2 && j <= 4 ? pulls + 1 : pullsLvl1;
+                    LevelProgram.Add(new LevelProgram("Новичок", i, j, j > 2 && j <= 4 ? pulls + 1 : pullsLvl1));
+
+                    pulls = pullsLvl2;
+                    //pullsLvl2 = j > 2 && j <= 4 ? pulls + 2 : pullsLvl2;
+                    LevelProgram.Add(new LevelProgram("Профи", i, j, j > 2 && j <= 4 ? pulls + 2 : pullsLvl2 + 1));
+
+                    pulls = pullsLvl3;
+                    //pullsLvl3 = j > 2 && j <= 4 ? pulls + 3 : pullsLvl3;
+                    LevelProgram.Add(new LevelProgram("Турникмен", i, j, j > 2 && j <= 4 ? pulls + 3 : pullsLvl3 + 2));
+                    
                     date = date.AddDays(1);
                 }
             }
             return LevelProgram;
         }
-
-
     }
 }

@@ -19,13 +19,11 @@ namespace PullUpsDapper
     public class UserDayProgram
     {
         public static bool DayReport { get; set; }
-        public DateTime Date { get; set; }
         public int Approach { get; set; }
         public int Pulls { get; set; }
 
-        public UserDayProgram(DateTime date, int approach, int pulls)
+        public UserDayProgram(int approach, int pulls)
         {
-            Date = date;
             Approach = approach;
             Pulls = pulls;
         }
