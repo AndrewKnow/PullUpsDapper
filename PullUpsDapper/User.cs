@@ -29,7 +29,5 @@ namespace PullUpsDapper
             Approach = approach;
             Pulls = pulls;
         }
-
     }
-
 }

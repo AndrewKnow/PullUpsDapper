@@ -30,6 +30,5 @@ namespace PullUpsDapper
             f.Close();
             return Key;
         }
-
     }
 }

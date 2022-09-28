@@ -302,8 +302,6 @@ namespace PullUpsDapper
                         ResizeKeyboard = true
                     };
                     break;
-
-
             }
             return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
                 text: "👇🏻", replyMarkup: replyKeyboardMarkup);
