@@ -30,15 +30,15 @@ namespace PullUpsDapper
             return conn.Query<User>("SELECT * FROM  pulls.users ;").ToList();
         }
 
-        public (string lvl, int count, bool program) GetUsersId(long userId)
+        public (string lvl, int count) GetUsersId(long userId)
         {
             ConnString = DBConnection.ConnectionString();
             using var conn = new NpgsqlConnection(ConnString);
             string lvl = conn.ExecuteScalar<string>("SELECT users.level FROM  pulls.users  WHERE users.user_id = " + userId + ";");
             int count = conn.ExecuteScalar<int>("SELECT count(*) FROM  pulls.users  WHERE users.user_id = " + userId + ";");
-            bool program = conn.ExecuteScalar<bool>("SELECT count(*) FROM  pulls.user_program  WHERE user_program.user_id = " + userId + ";");
+            //bool program = conn.ExecuteScalar<bool>("SELECT count(*) FROM  pulls.lvl_user_program  WHERE lvl_user_program.user_id = " + userId + ";");
             conn.Close();
-            return (lvl, count, program);
+            return (lvl, count);
         }
 
         public void CreateUser(User user)
@@ -62,26 +62,27 @@ namespace PullUpsDapper
         public void CreateTrainingProgram(string lvl, long userId)
         {
             ConnString = DBConnection.ConnectionString();
-            var (DayResult, UserProgram) = CreateProgram.CreateLvlProgram(lvl, userId);
+            // var (result, UserProgram) = CreateProgram.CreateUserProgram(lvl, userId);
+            var result = CreateProgram.CreateUserProgram(lvl, userId);
             using var conn = new NpgsqlConnection(ConnString);
-            for (int i = 0; i < UserProgram.Count; i++)
-            {  
-                TrainingProgram program = UserProgram[i];
-                var sqlQuery = "INSERT INTO pulls.user_program (user_id, week, approach, pulls)  VALUES ('"
-                    + program.Id + "', '"
-                    + program.Week + "', '"
-                    + program.Approach + "', '"
-                    + program.Pulls + "'"
-                    + ")";
-                conn.Execute(sqlQuery); 
-            }
-            for (int i = 0; i < DayResult.Count; i++)
+            //for (int i = 0; i < UserProgram.Count; i++)
+            //{  
+            //    TrainingProgram program = UserProgram[i];
+            //    var sqlQuery = "INSERT INTO pulls.user_program (user_id, week, approach, pulls)  VALUES ('"
+            //        + program.Id + "', '"
+            //        + program.Week + "', '"
+            //        + program.Approach + "', '"
+            //        + program.Pulls + "'"
+            //        + ")";
+            //    conn.Execute(sqlQuery); 
+            //}
+            for (int i = 0; i < result.Count; i++)
             {
-                DayResult dayResult = DayResult[i];
+                DayResult res = result[i];
                 var sqlQuery = "INSERT INTO pulls.day_result (user_id, week, date, pulls)  VALUES ('"
-                    + dayResult.Id + "', '"
-                    + dayResult.Week + "', '"
-                    + dayResult.Date + "', '"
+                    + res.Id + "', '"
+                    + res.Week + "', '"
+                    + res.Date + "', '"
                     + 0 + "'"
                     + ")";
                 conn.Execute(sqlQuery);
@@ -94,13 +95,9 @@ namespace PullUpsDapper
             ConnString = DBConnection.ConnectionString();
             var date = DateTime.Now;
             using var conn = new NpgsqlConnection(ConnString);
-            //string sqlQuery = "SELECT user_program.date, user_program.approach , 
-            //                user_program.pulls FROM  pulls.user_program a LEFT JOIN pulls.day_result b ON a.user_id = b.user_id WHERE user_program.user_id = " + userId +
-            //            " and user_program.date = CAST('" + date + "' as Date);";
-
             string sqlQuery = "SELECT b.date, a.approach , a.pulls" +
-                              " FROM  pulls.user_program a LEFT JOIN pulls.day_result b ON a.user_id = b.user_id and a.week = b.week " +
-                              " WHERE a.user_id = " + userId + " and b.date = CAST('" + date + "' as Date);";
+                              " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.user_id = b.user_id and a.week = b.week " +
+                              " WHERE a.level = (Select level From pulls.users Where user_id = " + userId + ")  and b.date = CAST('" + date + "' as Date);";
 
             var dayProgram = conn.Query<UserDayProgram>(sqlQuery);
             List<UserDayProgram> userDayProgram = new List<UserDayProgram>();
@@ -119,13 +116,11 @@ namespace PullUpsDapper
             string checkResult;
             ConnString = DBConnection.ConnectionString();
             using var conn = new NpgsqlConnection(ConnString);
-            //int check = conn.ExecuteScalar<int>("SELECT count(*) FROM   pulls.day_result WHERE day_result.user_id = " + userId + " and date = '" + date + "';");
-
-            //int sumPullsFromProgram = conn.ExecuteScalar<int>("SELECT sum(pulls) FROM pulls.user_program WHERE user_program.date = '" + date + 
-            //    "' and user_program.user_id  = '" + userId + "';");
-
-            int sumPullsFromProgram = conn.ExecuteScalar<int>("Select sum(pulls) From pulls.user_program WHERE " +
-                        "week = (Select week From pulls.day_result WHERE date = CAST('" + date +"' as Date));");
+            string sqlQuery;
+            sqlQuery = "Select sum(pulls) From pulls.lvl_user_program WHERE " +
+                              "week = (Select week From pulls.day_result WHERE date = CAST('" + date + "' as Date)) " +
+                              "and a.level = (Select level From pulls.users Where user_id = " + userId + ");";
+            int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery);
 
             if (pulls < sumPullsFromProgram)
             {
@@ -139,21 +134,35 @@ namespace PullUpsDapper
             {
                 checkResult = "выполнил";
             }
-
-            //if (check == 0)
-            //{
-            //    var sqlQuery = "INSERT INTO pulls.day_result  (user_id, date, pulls) VALUES ('" + userId + "', '" + date + "', '" + pulls + "')";
-            //    conn.Execute(sqlQuery);
-            //}
-            //else
-            //{
-            var sqlQuery = "UPDATE pulls.day_result Set pulls = '" + pulls + "' WHERE day_result.user_id = " + userId + " and date = CAST('" + date + "' as Date));";
+            sqlQuery = "UPDATE pulls.day_result Set pulls = '" + pulls + "' WHERE day_result.user_id = " + userId + " and date = CAST('" + date + "' as Date);";
             conn.Execute(sqlQuery);
-            //}
             UserDayProgram.DayReport = false;
             conn.Close();
 
             return checkResult;
         }
+
+        public void CreateLevelProgram(string lvl)
+        {
+            ConnString = DBConnection.ConnectionString();
+            var result = CreateProgram.CreareProgramLevel(lvl);
+
+            using var conn = new NpgsqlConnection(ConnString);
+            for (int i = 0; i < result.Count; i++)
+            {
+                LevelProgram res = result[i];
+                var sqlQuery = "INSERT INTO pulls.lvl_user_program (level, week, approach, pulls)  VALUES ('"
+                    + res.Level + "', '"
+                    + res.Week + "', '"
+                    + res.Approach + "', '"
+                    + res.Pulls + "'"
+                    + ")";
+                conn.Execute(sqlQuery); 
+            }
+
+
+
+        }
+
     }
 }
