@@ -17,7 +17,7 @@ namespace PullUpsDapper
         {
             string Key = Password.Bot();
             var bot = new TelegramBotClient(Key);
-
+            UserDayProgram.DayReport = false;
             Console.WriteLine("Включён бот " + bot.GetMeAsync().Result.FirstName);
 
             using var cts = new CancellationTokenSource();
@@ -50,19 +50,52 @@ namespace PullUpsDapper
         {
             try
             {
-                Message? message = update.Message;
+                Message message = update.Message;
                 var userId = message.From.Id;
                 var name = message.From.FirstName;
 
                 UserRepository userRepository = new();
                 var list = userRepository.GetUsers();
 
-                
-
                 if (update.Type == UpdateType.Message)
                 {
                     var (level, count, program) = userRepository.GetUsersId(userId);
-                    switch (message.Text.ToLower())
+
+                    if (UserDayProgram.DayReport)
+                    {
+                        bool pullsCheck = int.TryParse(message.Text, out int result);
+                        if (pullsCheck)
+                        {
+                            string checkResult = userRepository.DayResult(userId, result);
+
+                            
+                            if (result >= 1 && result <= 4)
+                            {
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                    $"Записал {result} повторения за сегодня, ты {checkResult} программу на сегодня",
+                                    cancellationToken: cancellationToken);
+                            }
+                            else
+                            {
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                    $"Записал {result} повторений за сегодня, ты {checkResult} программу на сегодня",
+                                    cancellationToken: cancellationToken);
+
+                            }
+
+                            UserDayProgram.DayReport = false;
+                        }
+                        else
+                        {
+                            await botClient.SendTextMessageAsync(message.Chat,
+                                "Введено не число, ввод данных отменён!",
+                                cancellationToken: cancellationToken);
+                            UserDayProgram.DayReport = false;
+
+                        }
+                    }
+
+                    switch (message.Text)
                     {
                         case "/start":
                             if (level != null && count == 1 && program == true)
@@ -116,7 +149,7 @@ namespace PullUpsDapper
                             await SendReplyKeboard(botClient, message, 0);
 
                             break;
-                        case "🦾создать программу тренировок":
+                        case "🦾Создать программу тренировок":
                             if (program)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
@@ -129,19 +162,23 @@ namespace PullUpsDapper
                                 userRepository.CreateTrainingProgram(level, userId);
                             }
                             break;
-                        case "✅oтчёт о выполнении":
+                        case "✔️Отчёт о выполнении":
 
+                            await botClient.SendTextMessageAsync(message.Chat,
+                                "Введи общее количество выполненных повторений:",
+                                cancellationToken: cancellationToken);
+                            UserDayProgram.DayReport = true;
                             break;
-                        case "💪моя задача на сегодня":
+                        case "💪Моя задача на сегодня":
                             // вывод в список программы тернировок
-                            var userDayResult =  userRepository.DayStatus(userId);
+                            var userDayProgram =  userRepository.DayStatus(userId);
                             await botClient.SendTextMessageAsync(message.Chat,
                              $"Дата: {DateTime.Today.ToShortDateString()}\nПодход - Повторения",
                             cancellationToken: cancellationToken);
 
                             StringBuilder sb = new StringBuilder();
 
-                            foreach (var item in userDayResult)
+                            foreach (var item in userDayProgram)
                             {
                                 sb.Append($"{item.Approach} - {item.Pulls}\n");
                             }
@@ -150,12 +187,12 @@ namespace PullUpsDapper
                                 sb.ToString(),
                                 cancellationToken: cancellationToken);
                             break;
-                        case "📊график":
+                        case "📊График":
                             break;
-                        case "❌удалить программу":
+                        case "❌Удалить программу":
 
                             break;
-                        case "новичок":
+                        case "Новичок":
                             userRepository.UpdateUser("Новичок", userId);
 
                             (level, count, program) = userRepository.GetUsersId(userId);
@@ -169,7 +206,7 @@ namespace PullUpsDapper
                             await RemoveReplyKeboard(botClient, message);
                             await SendReplyKeboard(botClient, message, 3);
                             break;
-                        case "профи":
+                        case "Профи":
                             userRepository.UpdateUser("Профи", userId);
 
                             (level, count, program) = userRepository.GetUsersId(userId);
@@ -183,7 +220,7 @@ namespace PullUpsDapper
                             await RemoveReplyKeboard(botClient, message);
                             await SendReplyKeboard(botClient, message, 3);
                             break;
-                        case "турникмэн":
+                        case "Турникмэн":
                             userRepository.UpdateUser("Турникмен", userId);
 
                             (level, count, program) = userRepository.GetUsersId(userId);
@@ -215,11 +252,11 @@ namespace PullUpsDapper
                     replyKeyboardMarkup = new(
                        new[]
                        {
-                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F9BE) + "Создать программу тренировок" },
-                            new KeyboardButton [] { char.ConvertFromUtf32(0x2705) + "Отчёт о выполнении"},
-                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F4AA) + "Моя задача на сегодня" },
-                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F4CA) + "График" },
-                            new KeyboardButton [] { char.ConvertFromUtf32(0x274C) + "Удалить программу" },
+                            new KeyboardButton [] { "🦾Создать программу тренировок" },
+                            new KeyboardButton [] { "✔️Отчёт о выполнении"},
+                            new KeyboardButton [] { "💪Моя задача на сегодня" },
+                            new KeyboardButton [] { "📊График" },
+                            new KeyboardButton [] { "❌Удалить программу" },
                        })
                     {
 
@@ -230,7 +267,7 @@ namespace PullUpsDapper
                     replyKeyboardMarkup = new(
                        new[]
                        {
-                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F9BE) + "Создать программу тренировок" }
+                            new KeyboardButton [] { "🦾Создать программу тренировок" },
                        })
                     {
 
@@ -255,10 +292,10 @@ namespace PullUpsDapper
                     replyKeyboardMarkup = new(
                        new[]
                        {
-                            new KeyboardButton [] { char.ConvertFromUtf32(0x2705) + "Отчёт о выполнении"},
-                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F4AA) + "Моя задача на сегодня" },
-                            new KeyboardButton [] { char.ConvertFromUtf32(0x1F4CA) + "График" },
-                            new KeyboardButton [] { char.ConvertFromUtf32(0x274C) + "Удалить программу" },
+                            new KeyboardButton [] { "✔️Отчёт о выполнении"},
+                            new KeyboardButton [] { "💪Моя задача на сегодня" },
+                            new KeyboardButton [] { "📊График" },
+                            new KeyboardButton [] { "❌Удалить программу" },
                        })
                     {
 
