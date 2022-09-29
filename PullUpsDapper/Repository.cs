@@ -114,7 +114,7 @@ namespace PullUpsDapper
         public string DayResult(long userId, int pulls)
         {
             var date = DateTime.Now;
-            string checkResult;
+            string checkResult = "";
             ConnString = DBConnection.ConnectionString();
             using var conn = new NpgsqlConnection(ConnString);
             string sqlQuery;
@@ -123,15 +123,15 @@ namespace PullUpsDapper
                               "and level = (Select level From pulls.users Where user_id = " + userId + ")::text;";
             int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery);
 
-            if (pulls < sumPullsFromProgram)
+            if (pulls < sumPullsFromProgram && sumPullsFromProgram > 0)
             {
                 checkResult = "не доделал";
             }    
-            else if (pulls > sumPullsFromProgram)
+            else if (pulls > sumPullsFromProgram && sumPullsFromProgram > 0)
             {
                 checkResult = "перевыполнил";
             }
-            else
+            else if (sumPullsFromProgram > 0)
             {
                 checkResult = "выполнил";
             }
@@ -146,9 +146,13 @@ namespace PullUpsDapper
         public void CreateLevelProgram()
         {
             ConnString = DBConnection.ConnectionString();
-            var result = CreateProgram.CreareProgramLevel();
 
+
+            var result = CreateProgram.CreareProgramLevel();
             using var conn = new NpgsqlConnection(ConnString);
+
+            conn.Execute("DELETE From pulls.lvl_user_program");
+
             for (int i = 0; i < result.Count; i++)
             {
                 LevelProgram res = result[i];

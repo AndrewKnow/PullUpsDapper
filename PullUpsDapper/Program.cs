@@ -160,45 +160,69 @@ namespace PullUpsDapper
 
                             break;
 
-                        case "🦾Создать программу тренировок":
-                            if (level != null)
-                            {
-                                await botClient.SendTextMessageAsync(message.Chat,
-                                    @$"{name}, у тебя уже сть программа тернировок ""{level}"""
-                                    + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
-                                    cancellationToken: cancellationToken);
-                            }
-                            else
-                            {
-                                userRepository.CreateTrainingProgram(level, userId);
-                            }
-                            break;
+                        //case "🦾Создать программу тренировок":
+                        //    if (level != null)
+                        //    {
+                        //        await botClient.SendTextMessageAsync(message.Chat,
+                        //            @$"{name}, у тебя уже сть программа тернировок ""{level}"""
+                        //            + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
+                        //            cancellationToken: cancellationToken);
+                        //    }
+                        //    else
+                        //    {
+                        //        userRepository.CreateTrainingProgram(level, userId);
+                        //    }
+                        //    break;
 
                         case "✔️Отчёт о выполнении":
 
-                            await botClient.SendTextMessageAsync(message.Chat,
+                            if (level != null && count == 1)
+                            {
+                                await botClient.SendTextMessageAsync(message.Chat,
                                 "Введи общее количество выполненных повторений:",
                                 cancellationToken: cancellationToken);
-                            UserDayProgram.DayReport = true;
+                                UserDayProgram.DayReport = true;
+                            }
+                            else
+                            {
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                "Не создана программ тренировок!\nВыбирайте:",
+                                cancellationToken: cancellationToken);
+                                await RemoveReplyKeboard(botClient, message);
+                                await SendReplyKeboard(botClient, message, 2);
+                            }
                             break;
 
                         case "💪Моя задача на сегодня":
                             // вывод в список программы тернировок
-                            var userDayProgram =  userRepository.DayStatus(userId);
-                            await botClient.SendTextMessageAsync(message.Chat,
-                             $"Дата: {DateTime.Today.ToShortDateString()}\nПодход - Повторения",
-                            cancellationToken: cancellationToken);
-
-                            StringBuilder sb = new StringBuilder();
-
-                            foreach (var item in userDayProgram)
+                            if (level != null && count == 1)
                             {
-                                sb.Append($"{item.Approach} - {item.Pulls}\n");
-                            }
-      
-                            await botClient.SendTextMessageAsync(message.Chat,
-                                sb.ToString(),
+
+                                var userDayProgram = userRepository.DayStatus(userId);
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                 $"Дата: {DateTime.Today.ToShortDateString()}\nПодход - Повторения",
                                 cancellationToken: cancellationToken);
+
+                                StringBuilder sb = new StringBuilder();
+
+                                foreach (var item in userDayProgram)
+                                {
+                                    sb.Append($"{item.Approach} - {item.Pulls}\n");
+                                }
+
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                    sb.ToString(),
+                                    cancellationToken: cancellationToken);
+
+                            }
+                            else
+                            {
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                "Не создана программ тренировок!\nВыбирайте:",
+                                cancellationToken: cancellationToken);
+                                await RemoveReplyKeboard(botClient, message);
+                                await SendReplyKeboard(botClient, message, 2);
+                            }
                             break;
 
                         case "📊График":
@@ -276,7 +300,7 @@ namespace PullUpsDapper
                        new[]
                        {
                             new KeyboardButton [] { "Администратор" },
-                            new KeyboardButton [] { "🦾Создать программу тренировок" },
+                            //new KeyboardButton [] { "🦾Создать программу тренировок" },
                             new KeyboardButton [] { "✔️Отчёт о выполнении"},
                             new KeyboardButton [] { "💪Моя задача на сегодня" },
                             new KeyboardButton [] { "📊График" },
