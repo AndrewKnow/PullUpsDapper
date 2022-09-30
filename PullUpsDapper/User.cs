@@ -15,6 +15,7 @@ namespace PullUpsDapper
     {
         public long IdUser { get; set; }
         public string? Name { get; set; }
+        public string? Level { get; set; }
     }
     public class UserDayProgram
     {

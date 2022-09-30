@@ -20,9 +20,11 @@ namespace PullUpsDapper
         List<UserDayProgram> DayStatus(long userId);
         string DayResult(long userId, int pulls);
         void CreateLevelProgram();
+
+        void DeleteUserProgram(long userId);
     }
     public class UserRepository : IUser
-    {     
+    {
         public string ConnString { get; set; }
         public List<User> GetUsers()
         {
@@ -41,6 +43,19 @@ namespace PullUpsDapper
             conn.Close();
             return (lvl, count);
         }
+
+        public User GetUsersLevel(long userId)
+        {
+            // для теста
+            ConnString = DBConnection.ConnectionString();
+            using var conn = new NpgsqlConnection(ConnString);
+            string query = "SELECT users.level FROM  pulls.users  WHERE users.user_id = @users.user_id;";
+            var lvl = conn.QueryFirstOrDefault<User>(query, new { user_id = userId });
+
+            return lvl;
+        }
+
+
 
         public void CreateUser(User user)
         {
@@ -126,7 +141,7 @@ namespace PullUpsDapper
             if (pulls < sumPullsFromProgram && sumPullsFromProgram > 0)
             {
                 checkResult = "не доделал";
-            }    
+            }
             else if (pulls > sumPullsFromProgram && sumPullsFromProgram > 0)
             {
                 checkResult = "перевыполнил";
@@ -146,8 +161,6 @@ namespace PullUpsDapper
         public void CreateLevelProgram()
         {
             ConnString = DBConnection.ConnectionString();
-
-
             var result = CreateProgram.CreareProgramLevel();
             using var conn = new NpgsqlConnection(ConnString);
 
@@ -162,8 +175,19 @@ namespace PullUpsDapper
                     + res.Approach + "', '"
                     + res.Pulls + "'"
                     + ")";
-                conn.Execute(sqlQuery); 
+                conn.Execute(sqlQuery);
             }
+            conn.Close();
+        }
+        public void DeleteUserProgram(long userId)
+        {
+            ConnString = DBConnection.ConnectionString();
+            using var conn = new NpgsqlConnection(ConnString);
+            conn.Execute("DELETE From pulls.day_result Where day_result.user_id = " + userId + ";");
+
+            conn.Execute("UPDATE pulls.users SET level = null Where users.user_id = " + userId + ";");
+            conn.Close();
+
         }
     }
 }

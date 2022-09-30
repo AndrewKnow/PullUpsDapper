@@ -13,6 +13,9 @@ namespace PullUpsDapper
 {
     internal class Program
     {
+
+        public static long User { get; set; }
+
         static void Main(string[] args)
         {
             string Key = Password.Bot();
@@ -51,14 +54,31 @@ namespace PullUpsDapper
             try
             {
                 Message message = update.Message;
-                var userId = message.From.Id;
-                var name = message.From.FirstName;
 
                 UserRepository userRepository = new();
-                var list = userRepository.GetUsers();
+                User user = new User();
 
+                if (update.Type == UpdateType.CallbackQuery)
+                {
+                    CallbackQuery callbackQuery = update.CallbackQuery;
+                    var messageCB = callbackQuery.Data;
+                    switch (messageCB)
+                    {
+                        case "Удалить":
+                            userRepository.DeleteUserProgram(User);
+                            await botClient.SendTextMessageAsync(callbackQuery.Message.Chat, "Программа удалена",
+                                cancellationToken: cancellationToken);
+                            break;
+                        case "Отмена":
+                            break;
+                    }
+
+                }
                 if (update.Type == UpdateType.Message)
                 {
+                    var userId = message.From.Id;
+                    var name = message.From.FirstName;
+                    var list = userRepository.GetUsers();
                     var (level, count) = userRepository.GetUsersId(userId);
 
                     if (UserDayProgram.DayReport)
@@ -130,7 +150,7 @@ namespace PullUpsDapper
 
                             else if (level == null && count == 0)
                             {
-                                User user = new User();
+                                
                                 user.IdUser = userId;
                                 user.Name = name;
                                 userRepository.CreateUser(user);
@@ -156,7 +176,6 @@ namespace PullUpsDapper
                                 await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 0);
                             }
-
 
                             break;
 
@@ -230,10 +249,32 @@ namespace PullUpsDapper
 
                         case "❌Удалить программу":
 
+                            var keyboard = new InlineKeyboardMarkup(new[]
+                            {
+                                    new []
+                                    {
+                                        InlineKeyboardButton.WithCallbackData("Удалить", "Удалить"),
+                                    },
+                                    new []
+                                    {
+                                        InlineKeyboardButton.WithCallbackData("Отмена", "Отмена"),
+                                    },
+
+                                    }
+                            );
+                            User = userId;
+                            await botClient.SendTextMessageAsync(message.Chat, "Подтверждение удаления:" + char.ConvertFromUtf32(0x1F447),
+                                replyMarkup: keyboard, cancellationToken: cancellationToken);
+
+                            //userRepository.DeleteUserProgram(userId);
+
                             break;
 
                         case "Новичок":
                             userRepository.UpdateUser("Новичок", userId);
+
+
+                            var s = userRepository.GetUsersLevel(userId).Level;
 
                             (level, count) = userRepository.GetUsersId(userId);
                             userRepository.CreateTrainingProgram(level, userId);
@@ -294,7 +335,6 @@ namespace PullUpsDapper
             ReplyKeyboardMarkup? replyKeyboardMarkup = null;
             switch (lvl)
             {
-
                 case 5:
                     replyKeyboardMarkup = new(
                        new[]
@@ -375,7 +415,6 @@ namespace PullUpsDapper
         {
             return await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "..."
                          , replyMarkup: new ReplyKeyboardRemove());
-
         }
 
     }

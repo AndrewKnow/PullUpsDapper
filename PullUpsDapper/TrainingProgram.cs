@@ -106,7 +106,7 @@ namespace PullUpsDapper
             return DayResult;
         }
 
-        public static List<LevelProgram> CreareProgramLevel()
+        public static List<LevelProgram> CreareProgramLevel() // Функция администратора
         {
             DateTime date = DateTime.Now;
             int pulls = 0;
