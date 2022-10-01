@@ -19,7 +19,6 @@ namespace PullUpsDapper
             Approach = approach;
             Pulls = pulls;
         }
-
     }
     public class LevelProgram
     {
@@ -34,7 +33,6 @@ namespace PullUpsDapper
             Approach = approach;
             Pulls = pulls;
         }
-
     }
     public class DayResult
     {
@@ -53,16 +51,13 @@ namespace PullUpsDapper
 
     public class CreateProgram
     {
-        // реализовать программу администратором!!!
-        // администратор создаёт программы Новичок, профи, турникмен UserProgram.
-        // вместо user id  - lvl
-        // данный клас пишет  DayResult из UserProgram соответсвующего lvl
         public static List<TrainingProgram> UserProgram = new List<TrainingProgram>();
         public static List<DayResult> DayResult = new List<DayResult>();
         public static List<LevelProgram> LevelProgram = new List<LevelProgram>();
-        //public static (List<DayResult> , List<TrainingProgram>) CreateUserProgram(string lvl, long userId)
         public static List<DayResult> CreateUserProgram(string lvl, long userId)
         {
+            DayResult.Clear();
+
             DateTime date = DateTime.Now;
             int pulls;
             int pullsMax;
@@ -92,22 +87,23 @@ namespace PullUpsDapper
                 }
             }
 
-            for (int i = 0; i < UserProgram.Count; i++)
-            {
-                TrainingProgram program = UserProgram[i];
-                Console.WriteLine($"{program.Id} {program.Week} {program.Approach} {program.Pulls}");
-            }
+            //for (int i = 0; i < UserProgram.Count; i++)
+            //{
+            //    TrainingProgram program = UserProgram[i];
+            //    Console.WriteLine($"{program.Id} {program.Week} {program.Approach} {program.Pulls}");
+            //}
             for (int i = 0; i < DayResult.Count; i++)
             {
                 DayResult program = DayResult[i];
                 Console.WriteLine($"{program.Id} {program.Week} {program.Date} {program.Pulls}");
             }
-            // return (DayResult, UserProgram);
             return DayResult;
         }
 
         public static List<LevelProgram> CreareProgramLevel() // Функция администратора
         {
+            LevelProgram.Clear();
+
             DateTime date = DateTime.Now;
             int pulls = 0;
             int pullsLvl1 = 0;
@@ -121,15 +117,12 @@ namespace PullUpsDapper
                 for (int j = 1; j <= 6; j++) // подход
                 {
                     pulls = pullsLvl1;
-                    //pullsLvl1 = j > 2 && j <= 4 ? pulls + 1 : pullsLvl1;
                     LevelProgram.Add(new LevelProgram("Новичок", i, j, j > 2 && j <= 4 ? pulls + 1 : pullsLvl1));
 
                     pulls = pullsLvl2;
-                    //pullsLvl2 = j > 2 && j <= 4 ? pulls + 2 : pullsLvl2;
                     LevelProgram.Add(new LevelProgram("Профи", i, j, j > 2 && j <= 4 ? pulls + 2 : pullsLvl2 + 1));
 
                     pulls = pullsLvl3;
-                    //pullsLvl3 = j > 2 && j <= 4 ? pulls + 3 : pullsLvl3;
                     LevelProgram.Add(new LevelProgram("Турникмен", i, j, j > 2 && j <= 4 ? pulls + 3 : pullsLvl3 + 2));
                     
                     date = date.AddDays(1);

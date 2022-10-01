@@ -13,7 +13,6 @@ namespace PullUpsDapper
 {
     internal class Program
     {
-
         public static long User { get; set; }
 
         static void Main(string[] args)
@@ -72,7 +71,6 @@ namespace PullUpsDapper
                         case "Отмена":
                             break;
                     }
-
                 }
                 if (update.Type == UpdateType.Message)
                 {
@@ -100,7 +98,6 @@ namespace PullUpsDapper
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     $"Записал {result} повторений за сегодня, ты {checkResult} программу на сегодня",
                                     cancellationToken: cancellationToken);
-
                             }
 
                             UserDayProgram.DayReport = false;
@@ -111,7 +108,6 @@ namespace PullUpsDapper
                                 "Введено не число, ввод данных отменён!",
                                 cancellationToken: cancellationToken);
                             UserDayProgram.DayReport = false;
-
                         }
                     }
 
@@ -128,16 +124,6 @@ namespace PullUpsDapper
                                 await SendReplyKeboard(botClient, message, 3);
                             }
 
-                            //if (level != null && count == 1 && program == false)
-                            //{
-                            //    await botClient.SendTextMessageAsync(message.Chat,
-                            //        @$"{name}, твоя программа ""{level}"" нажми на ""🦾создать программу тренировок"" чтобы начать тренировки:"
-                            //        + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
-                            //        cancellationToken: cancellationToken);
-                            //    await RemoveReplyKeboard(botClient, message);
-                            //    await SendReplyKeboard(botClient, message, 1);
-                            //}
-
                             if (level == null && count == 1)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
@@ -147,7 +133,6 @@ namespace PullUpsDapper
                                 await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 2);
                             }
-
                             else if (level == null && count == 0)
                             {
                                 
@@ -162,7 +147,6 @@ namespace PullUpsDapper
                                 await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 2);
                             }
-
                             break;
 
                         case "/menu":
@@ -176,22 +160,7 @@ namespace PullUpsDapper
                                 await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 0);
                             }
-
                             break;
-
-                        //case "🦾Создать программу тренировок":
-                        //    if (level != null)
-                        //    {
-                        //        await botClient.SendTextMessageAsync(message.Chat,
-                        //            @$"{name}, у тебя уже сть программа тернировок ""{level}"""
-                        //            + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
-                        //            cancellationToken: cancellationToken);
-                        //    }
-                        //    else
-                        //    {
-                        //        userRepository.CreateTrainingProgram(level, userId);
-                        //    }
-                        //    break;
 
                         case "✔️Отчёт о выполнении":
 
@@ -213,10 +182,8 @@ namespace PullUpsDapper
                             break;
 
                         case "💪Моя задача на сегодня":
-                            // вывод в список программы тернировок
                             if (level != null && count == 1)
                             {
-
                                 var userDayProgram = userRepository.DayStatus(userId);
                                 await botClient.SendTextMessageAsync(message.Chat,
                                  $"Дата: {DateTime.Today.ToShortDateString()}\nПодход - Повторения",
@@ -232,7 +199,6 @@ namespace PullUpsDapper
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     sb.ToString(),
                                     cancellationToken: cancellationToken);
-
                             }
                             else
                             {

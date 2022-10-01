@@ -8,11 +8,12 @@ using System.Data;
 using Npgsql;
 using System.Linq;
 using Telegram.Bot.Types;
-
+using System.ComponentModel.DataAnnotations;
 namespace PullUpsDapper
 {
     public class User
     {
+        [Key]
         public long IdUser { get; set; }
         public string? Name { get; set; }
         public string? Level { get; set; }
