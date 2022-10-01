@@ -186,14 +186,42 @@ namespace PullUpsDapper
                             {
                                 var userDayProgram = userRepository.DayStatus(userId);
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                 $"Дата: {DateTime.Today.ToShortDateString()}\nПодход - Повторения",
+                                 $"Дата: {DateTime.Today.ToShortDateString()}",
                                 cancellationToken: cancellationToken);
 
                                 StringBuilder sb = new StringBuilder();
-
+                                var i = 0;
+                                string tabs = new string('\t', 7);
+                                string tabs2 = new string('\t', 6);
+                                string tabs3 = new string('\t', 11);
+                                string tabs4 = new string('\t', 12);
                                 foreach (var item in userDayProgram)
                                 {
-                                    sb.Append($"{item.Approach} - {item.Pulls}\n");
+                                    if (i == 0)
+                                    {
+                                        sb.Append($"\u007CПодход\u007CПовторения\u007C\n");
+                                    }    
+
+                                    if (item.Pulls.ToString().Length == 1)
+                                    {
+                                        sb.Append(
+                                            $"\u007C{tabs}{item.Approach}{tabs2}" +
+                                            $"\u007C" +
+                                            $"{tabs3}{item.Pulls}" +
+                                            $"{tabs4}" +
+                                            $"\u007C\n");
+                                        i++;
+                                    }
+                                    else
+                                    {
+                                        sb.Append(
+                                            $"\u007C{tabs}{item.Approach}{tabs2}" +
+                                            $"\u007C" +
+                                            $"{tabs3}{item.Pulls}" +
+                                            $"{tabs3}" +
+                                            $"\u007C\n");
+                                        i++;
+                                    }
                                 }
 
                                 await botClient.SendTextMessageAsync(message.Chat,
