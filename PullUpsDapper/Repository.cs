@@ -36,11 +36,11 @@ namespace PullUpsDapper
         {
             ConnString = DBConnection.ConnectionString();
             using var conn = new NpgsqlConnection(ConnString);
-            //string lvl = conn.ExecuteScalar<string>("SELECT users.level FROM  pulls.users  WHERE users.user_id = " + userId + ";");
-            //int count = conn.ExecuteScalar<int>("SELECT count(*) FROM  pulls.users  WHERE users.user_id = " + userId + ";");
+            string lvl = conn.ExecuteScalar<string>("SELECT users.level FROM  pulls.users  WHERE users.user_id = " + userId + ";");
+            int count = conn.ExecuteScalar<int>("SELECT count(*) FROM  pulls.users  WHERE users.user_id = " + userId + ";");
 
-            string lvl = conn.ExecuteScalar<string>("SELECT users.level FROM  pulls.users  WHERE users.user_id = @users.user_id;", new { user_id = userId });
-            int count = conn.ExecuteScalar<int>("SELECT count(*) FROM  pulls.users  WHERE users.user_id = @users.user_id;", new { user_id = userId });
+            //string lvl = conn.Execute("SELECT users.level FROM  pulls.users  WHERE users.user_id = @user_id;", new { userId }).ToString();
+            //int count = conn.Execute("SELECT count(*) FROM  pulls.users  WHERE users.user_id = @user_id;", new {userId });
 
             conn.Close();
             return (lvl, count);
@@ -98,7 +98,7 @@ namespace PullUpsDapper
 
             string sqlQuery = "SELECT a.approach , a.pulls" +
                   " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.week = b.week " +
-                  " WHERE a.level = (Select level From pulls.users Where user_id = @users.user_id)::text  and b.date = CAST(@date as Date);";
+                  " WHERE a.level = (Select level From pulls.users Where user_id = @user_id)::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
 
             var dayProgram = conn.Query<UserDayProgram>(sqlQuery, new { @user_id = userId, @date = date });
 
@@ -120,8 +120,8 @@ namespace PullUpsDapper
             using var conn = new NpgsqlConnection(ConnString);
             string sqlQuery;
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
-                              "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date)) " +
-                              "and level = (Select level From pulls.users Where user_id = @users.user_id)::text;";
+                              "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
+                              "and level = (Select level From pulls.users Where user_id = @user_id)::text ;";
             int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date });
 
             if (pulls < sumPullsFromProgram && sumPullsFromProgram > 0)
