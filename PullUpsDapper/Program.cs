@@ -117,7 +117,7 @@ namespace PullUpsDapper
                             if (level != null && count == 1 )
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    @$"{name}, твоя программа ""{level}"" можешь проверить свою программу тренирок и зписать результат"
+                                    @$"{name}, твоя программа ""{level}"" можешь проверить свою программу тренировок и зписать результат"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
                                 await RemoveReplyKeboard(botClient, message);

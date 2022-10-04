@@ -36,11 +36,11 @@ namespace PullUpsDapper
         {
             ConnString = DBConnection.ConnectionString();
             using var conn = new NpgsqlConnection(ConnString);
-            string lvl = conn.ExecuteScalar<string>("SELECT users.level FROM  pulls.users  WHERE users.user_id = " + userId + ";");
-            int count = conn.ExecuteScalar<int>("SELECT count(*) FROM  pulls.users  WHERE users.user_id = " + userId + ";");
+            //string lvl = conn.ExecuteScalar<string>("SELECT users.level FROM  pulls.users  WHERE users.user_id = " + userId + ";");
+            //int count = conn.ExecuteScalar<int>("SELECT count(*) FROM  pulls.users  WHERE users.user_id = " + userId + ";");
 
-            //string lvl = conn.Execute("SELECT users.level FROM  pulls.users  WHERE users.user_id = @user_id;", new { userId }).ToString();
-            //int count = conn.Execute("SELECT count(*) FROM  pulls.users  WHERE users.user_id = @user_id;", new {userId });
+           string lvl = conn.ExecuteScalar<string>("SELECT users.level FROM  pulls.users  WHERE users.user_id = @user_id;", new { @user_id = userId });
+           int count = conn.ExecuteScalar<int>("SELECT count(*) FROM  pulls.users  WHERE users.user_id = @user_id;", new { @user_id = userId });
 
             conn.Close();
             return (lvl, count);
@@ -178,8 +178,8 @@ namespace PullUpsDapper
         {
             ConnString = DBConnection.ConnectionString();
             using var conn = new NpgsqlConnection(ConnString);
-            conn.Execute(@"DELETE From pulls.day_result Where day_result.user_id = @user_id;", new { user_id = userId });
-            conn.Execute(@"UPDATE pulls.users SET level = null Where users.user_id = @user_id;", new { user_id = userId });
+            conn.Execute(@"DELETE From pulls.day_result Where day_result.user_id = @user_id;", new { @user_id = userId });
+            conn.Execute(@"UPDATE pulls.users SET level = null Where users.user_id = @user_id;", new { @user_id = userId });
             conn.Close();
         }
     }

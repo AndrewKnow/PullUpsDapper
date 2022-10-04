@@ -92,11 +92,11 @@ namespace PullUpsDapper
             //    TrainingProgram program = UserProgram[i];
             //    Console.WriteLine($"{program.Id} {program.Week} {program.Approach} {program.Pulls}");
             //}
-            for (int i = 0; i < DayResult.Count; i++)
-            {
-                DayResult program = DayResult[i];
-                Console.WriteLine($"{program.Id} {program.Week} {program.Date} {program.Pulls}");
-            }
+            //for (int i = 0; i < DayResult.Count; i++)
+            //{
+            //    DayResult program = DayResult[i];
+            //    Console.WriteLine($"{program.Id} {program.Week} {program.Date} {program.Pulls}");
+            //}
             return DayResult;
         }
 
