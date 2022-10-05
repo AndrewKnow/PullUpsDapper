@@ -19,7 +19,7 @@ namespace PullUpsDapper
         List<UserDayProgram> DayStatus(long userId);
         string DayResult(long userId, int pulls);
         void CreateLevelProgram();
-        List<ForUserReport> UserReport(long userId);
+        IEnumerable<PlanPulls> UserReport(long userId, string lvl);
         void DeleteUserProgram(long userId);
     }
     public class UserRepository : IUser
@@ -87,26 +87,7 @@ namespace PullUpsDapper
             conn.Close();
         }
 
-        public List<UserDayProgram> DayStatus(long userId)
-        {
-            ConnString = DBConnection.ConnectionString();
-            var date = DateTime.Now;
-            using var conn = new NpgsqlConnection(ConnString);
 
-            string sqlQuery = "SELECT a.approach , a.pulls" +
-                  " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.week = b.week " +
-                  " WHERE a.level = (Select level From pulls.users Where user_id = @user_id)::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
-            var dayProgram = conn.Query<UserDayProgram>(sqlQuery, new { @user_id = userId, @date = date });
-
-            List<UserDayProgram> userDayProgram = new List<UserDayProgram>();
-
-            foreach (var item in dayProgram)
-            {
-                userDayProgram.Add(new UserDayProgram(item.Approach, item.Pulls));
-            }
-            conn.Close();
-            return userDayProgram;
-        }
 
         public string DayResult(long userId, int pulls)
         {
@@ -159,33 +140,108 @@ namespace PullUpsDapper
             conn.Close();
         }
 
-        public List<ForUserReport> UserReport(long userId)
+        public List<UserDayProgram> DayStatus(long userId)
         {
-            var sqlQuery = @"Select plan.week, plan.pulls_plan, fact.pulls_fact" +
-                            "From " +
-                           @"(Select week, sum(pulls) * 7 as ""pulls"" From pulls.lvl_user_program " +
-                            " where level = (Select level From pulls.users Where user_id = @user_id)::text " +
-                            " Group by week Order by week) as plan " +
-                            "Join " +
-                           @"(Select week, sum(pulls) as ""result"" " +
-                            " From pulls.day_result Where user_id = @user_id " +
-                            " Group by week Order by week) as fact " +
-                            " on plan.week = fact.week";
             ConnString = DBConnection.ConnectionString();
+            var date = DateTime.Now;
             using var conn = new NpgsqlConnection(ConnString);
 
-            var result = conn.Query<ForUserReport>(sqlQuery, new { @user_id = userId});
+            string sqlQuery = "SELECT a.approach , a.pulls" +
+                  " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.week = b.week " +
+                  " WHERE a.level = (Select level From pulls.users Where user_id = @user_id)::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
+            var dayProgram = conn.Query<UserDayProgram>(sqlQuery, new { @user_id = userId, @date = date });
 
-            List<ForUserReport> report = new List<ForUserReport>();
+            List<UserDayProgram> userDayProgram = new List<UserDayProgram>();
 
-            foreach (var item in report)
+            foreach (var item in dayProgram)
             {
-                report.Add(new ForUserReport(item.Week, item.Plan, item.Fact)) ;
+                userDayProgram.Add(new UserDayProgram(item.Approach, item.Pulls));
             }
-
             conn.Close();
+            return userDayProgram;
+        }
 
-            return report;
+        public IEnumerable<PlanPulls> UserReport(long userId, string lvl)
+        {
+            //var sqlQuery = @"Select plan.*, plan.week, fact.week, plan.pulls_plan, fact.pulls_fact " +
+            //                "From " +
+            //                "(Select week, sum(pulls) * 7 as pulls_plan From pulls.lvl_user_program " +
+            //               @" where level = (Select level From pulls.users Where user_id = @user_id)::text " +
+            //                " Group by week Order by week) as plan " +
+            //                "Join " +
+            //                "(Select week, sum(pulls) as pulls_fact " +
+            //                " From pulls.day_result Where user_id = @user_id " +
+            //                " Group by week Order by week) as fact " +
+            //                " on plan.week = fact.week";
+
+            // var userReport = conn.Query<ForUserReport>(sqlQuery, new { @user_id = userId});
+            ConnString = DBConnection.ConnectionString();
+
+
+
+            //using (var con = new SqlConnection(ConnString))
+            //{
+            //    return con.Query<PlanPulls, FactPulls, PlanPulls>(sqlQuery,
+            //        map: (order, customer) =>
+            //        {
+            //            order.Customer = customer;
+            //            return order;
+            //        },
+            //        param: new { @user_id = userId },
+            //        splitOn: "CustomerId").FirstOrDefault();
+            //}
+
+
+            using var conn = new NpgsqlConnection(ConnString);
+            {
+                var sqlQuery = @"Select plan.*, fact.*, plan.week as Id,fact.week as Id, plan.pullsplan,  fact.pullsfact " +
+                                "From " +
+                                "(Select week, sum(pulls) * 7 as pullsplan From pulls.lvl_user_program " +
+                               @"where level = @level::text " +
+                                "Group by week Order by week) as plan " +
+                                "Full Join " +
+                                "(Select week, sum(pulls) as pullsfact " +
+                                "From pulls.day_result Where user_id = @user_id " +
+                                "Group by week Order by week) as fact " +
+                                "on plan.week = fact.week";
+
+                var lookup = new Dictionary<int, PlanPulls>();
+                //var lookup2 = new Dictionary<int, FactPulls>();
+                _ = conn.Query<PlanPulls, FactPulls, PlanPulls>(sqlQuery, (p, f) => {
+
+                    PlanPulls planPulls;
+                    if (!lookup.TryGetValue(p.Week, out planPulls))
+                    {
+                        lookup.Add(p.Week, planPulls = p);
+                    }
+                    //FactPulls factPulls;
+                    if (planPulls.Facts == null)
+                        planPulls.Facts = new List<FactPulls>();
+                    planPulls.Facts.Add(f);
+                    //if (!lookup2.TryGetValue(f.Week, out factPulls))
+                    //{
+                    //    lookup2.Add(f.Week, factPulls = f);
+                    //    planPulls.Facts.Add(factPulls);
+                    //}
+
+                    return planPulls;
+                    }, new { @user_id = userId, @level = lvl }, splitOn: "Id"
+                 ).AsQueryable();
+                var resultList = lookup.Values;
+
+                //List <ForUserReport> report = new List<ForUserReport>();
+
+                foreach (var plan in resultList)
+                {
+                    foreach (var fact in plan.Facts)
+                    {
+                        Console.WriteLine($"{plan.Week} {plan.PullsPlan} {fact.PullsFact}");
+                    }
+                }
+
+                conn.Close();
+                return resultList;
+            }
         }
 
         public void DeleteUserProgram(long userId)
@@ -198,3 +254,18 @@ namespace PullUpsDapper
         }
     }
 }
+
+
+//var contians = lookup.ContainsKey(plan.Week);
+
+//if (contians)
+//{
+//    var newLinesToAdd = new List<FactPulls>();
+//    var existsLines = lookup[plan.Week].Facts;
+
+//    foreach (var existsLine in existsLines)
+//    {
+//        Console.WriteLine($"{plan.Week}{existsLine.Fact}");
+
+//    }
+//}

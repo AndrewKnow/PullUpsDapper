@@ -35,12 +35,41 @@ namespace PullUpsDapper
         public int Week { get; set; }
         public int Plan { get; set; }
         public int Fact { get; set; }
+        public IList<FactPulls> Facts { get; set; }
+        //public ForUserReport (int week, int plan, int fact)
+        //{
+        //    Week = week;
+        //    Plan = plan;
+        //    Fact = fact;
+            
+        //}
+    }
 
-        public ForUserReport (int week, int plan, int fact)
-        {
-            Week = week;
-            Plan = plan;
-            Fact = fact;
-        }
+    public class PlanPulls
+    {
+
+        public int Week { get; set; }
+        public long PullsPlan { get; set; }
+
+        public IList<FactPulls> Facts { get; set; }
+
+        //public PlanPulls(int week, int plan, IList<FactPulls> ts)
+        //{
+        //    Week = week;
+        //    Plan = plan;
+        //    Facts = ts;
+        //}
+    }
+    public class FactPulls
+    {
+        public int Week { get; set; }
+        public long PullsFact { get; set; }
+
+        //public IList<FactPulls> Facts { get; set; }
+        //public FactPulls( int id, int fact)
+        //{
+        //    Id = id;
+        //    Fact = fact;
+        //}
     }
 }

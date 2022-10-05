@@ -317,7 +317,9 @@ namespace PullUpsDapper
 
                             if (level != null && count == 1)
                             {
-                                var result = userRepository.UserReport(userId);
+                                var result = userRepository.UserReport(userId, level);
+
+
                             }
                             else
                             {
