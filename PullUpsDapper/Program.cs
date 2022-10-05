@@ -238,9 +238,6 @@ namespace PullUpsDapper
                             }
                             break;
 
-                        case "📊График":
-                            break;
-
                         case "❌Удалить программу":
 
                             var keyboard = new InlineKeyboardMarkup(new[]
@@ -314,6 +311,23 @@ namespace PullUpsDapper
                             await botClient.SendTextMessageAsync(message.Chat,
                             "Я всё сделал хозяин",
                             cancellationToken: cancellationToken);
+                            break;
+
+                        case "📊График":
+
+                            if (level != null && count == 1)
+                            {
+                                var result = userRepository.UserReport(userId);
+                            }
+                            else
+                            {
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                "Не создана программ тренировок!\nВыбирайте:",
+                                cancellationToken: cancellationToken);
+                                await RemoveReplyKeboard(botClient, message);
+                                await SendReplyKeboard(botClient, message, 2);
+                            }
+
                             break;
                     }
                 }

@@ -30,4 +30,17 @@ namespace PullUpsDapper
             Pulls = pulls;
         }
     }
+    public class ForUserReport
+    {
+        public int Week { get; set; }
+        public int Plan { get; set; }
+        public int Fact { get; set; }
+
+        public ForUserReport (int week, int plan, int fact)
+        {
+            Week = week;
+            Plan = plan;
+            Fact = fact;
+        }
+    }
 }

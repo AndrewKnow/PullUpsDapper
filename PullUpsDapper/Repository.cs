@@ -19,7 +19,7 @@ namespace PullUpsDapper
         List<UserDayProgram> DayStatus(long userId);
         string DayResult(long userId, int pulls);
         void CreateLevelProgram();
-
+        List<ForUserReport> UserReport(long userId);
         void DeleteUserProgram(long userId);
     }
     public class UserRepository : IUser
@@ -36,11 +36,9 @@ namespace PullUpsDapper
         {
             ConnString = DBConnection.ConnectionString();
             using var conn = new NpgsqlConnection(ConnString);
-            //string lvl = conn.ExecuteScalar<string>("SELECT users.level FROM  pulls.users  WHERE users.user_id = " + userId + ";");
-            //int count = conn.ExecuteScalar<int>("SELECT count(*) FROM  pulls.users  WHERE users.user_id = " + userId + ";");
 
-           string lvl = conn.ExecuteScalar<string>("SELECT users.level FROM  pulls.users  WHERE users.user_id = @user_id;", new { @user_id = userId });
-           int count = conn.ExecuteScalar<int>("SELECT count(*) FROM  pulls.users  WHERE users.user_id = @user_id;", new { @user_id = userId });
+            string lvl = conn.ExecuteScalar<string>("SELECT users.level FROM  pulls.users  WHERE users.user_id = @user_id;", new { @user_id = userId });
+            int count = conn.ExecuteScalar<int>("SELECT count(*) FROM  pulls.users  WHERE users.user_id = @user_id;", new { @user_id = userId });
 
             conn.Close();
             return (lvl, count);
@@ -53,7 +51,6 @@ namespace PullUpsDapper
             using var conn = new NpgsqlConnection(ConnString);
             string query = @"SELECT users.level FROM pulls.users  WHERE users.user_id = @users.user_id;";
             var lvl = conn.QueryFirstOrDefault<User>(query, new { user_id = userId });
-
             return lvl;
         }
 
@@ -99,7 +96,6 @@ namespace PullUpsDapper
             string sqlQuery = "SELECT a.approach , a.pulls" +
                   " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.week = b.week " +
                   " WHERE a.level = (Select level From pulls.users Where user_id = @user_id)::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
-
             var dayProgram = conn.Query<UserDayProgram>(sqlQuery, new { @user_id = userId, @date = date });
 
             List<UserDayProgram> userDayProgram = new List<UserDayProgram>();
@@ -136,12 +132,9 @@ namespace PullUpsDapper
             {
                 checkResult = "выполнил";
             }
-            //sqlQuery = "UPDATE pulls.day_result Set pulls = '" + pulls + "' WHERE day_result.user_id = " + userId + " and date = CAST('" + date + "' as Date);";
-            //conn.Execute(sqlQuery);
 
             sqlQuery = @"UPDATE pulls.day_result Set pulls = @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
             conn.Execute(sqlQuery, new { @pulls = pulls, @user_id = userId, @date = date });
-
 
             UserDayProgram.DayReport = false;
             conn.Close();
@@ -149,7 +142,7 @@ namespace PullUpsDapper
             return checkResult;
         }
 
-        public void CreateLevelProgram()
+        public void CreateLevelProgram() // Функция администратора
         {
             ConnString = DBConnection.ConnectionString();
             var result = CreateProgram.CreareProgramLevel();
@@ -160,20 +153,41 @@ namespace PullUpsDapper
             for (int i = 0; i < result.Count; i++)
             {
                 LevelProgram res = result[i];
-                //var sqlQuery = "INSERT INTO pulls.lvl_user_program (level, week, approach, pulls)  VALUES ('"
-                //    + res.Level + "', '"
-                //    + res.Week + "', '"
-                //    + res.Approach + "', '"
-                //    + res.Pulls + "'"
-                //    + ")";
-                //conn.Execute(sqlQuery);
                 var sqlQuery = @"INSERT INTO pulls.lvl_user_program (level, week, approach, pulls) VALUES (@level, @week, @approach, @pulls)";
                 conn.Execute(sqlQuery, new { @level = res.Level, @week = res.Week, @approach = res.Approach, @pulls = res.Pulls });
-
-
             }
             conn.Close();
         }
+
+        public List<ForUserReport> UserReport(long userId)
+        {
+            var sqlQuery = @"Select plan.week, plan.pulls_plan, fact.pulls_fact" +
+                            "From " +
+                           @"(Select week, sum(pulls) * 7 as ""pulls"" From pulls.lvl_user_program " +
+                            " where level = (Select level From pulls.users Where user_id = @user_id)::text " +
+                            " Group by week Order by week) as plan " +
+                            "Join " +
+                           @"(Select week, sum(pulls) as ""result"" " +
+                            " From pulls.day_result Where user_id = @user_id " +
+                            " Group by week Order by week) as fact " +
+                            " on plan.week = fact.week";
+            ConnString = DBConnection.ConnectionString();
+            using var conn = new NpgsqlConnection(ConnString);
+
+            var result = conn.Query<ForUserReport>(sqlQuery, new { @user_id = userId});
+
+            List<ForUserReport> report = new List<ForUserReport>();
+
+            foreach (var item in report)
+            {
+                report.Add(new ForUserReport(item.Week, item.Plan, item.Fact)) ;
+            }
+
+            conn.Close();
+
+            return report;
+        }
+
         public void DeleteUserProgram(long userId)
         {
             ConnString = DBConnection.ConnectionString();

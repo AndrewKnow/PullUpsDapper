@@ -105,25 +105,29 @@ namespace PullUpsDapper
             LevelProgram.Clear();
 
             DateTime date = DateTime.Now;
-            int pulls = 0;
-            int pullsLvl1 = 0;
-            int pullsLvl2 = 0;
-            int pullsLvl3 = 0;
+            int pulls;
+            int pullsLvl1 = 1;
+            int pullsLvl2 = 1;
+            int pullsLvl3 = 1;
             for (int i = 1; i <= 30; i++) // неделя
             {
-                pullsLvl1++;
-                pullsLvl2++;
-                pullsLvl3++;
+                if (i % 3 == 0)
+                {
+                    pullsLvl1++;
+                    pullsLvl2++;
+                    pullsLvl3++;
+                }
+
                 for (int j = 1; j <= 6; j++) // подход
                 {
                     pulls = pullsLvl1;
-                    LevelProgram.Add(new LevelProgram("Новичок", i, j, j > 2 && j <= 4 ? pulls + 1 : pullsLvl1));
+                    LevelProgram.Add(new LevelProgram("Новичок", i, j, j > 2 && j <= 3 ? pulls + 1 : pullsLvl1));
 
                     pulls = pullsLvl2;
                     LevelProgram.Add(new LevelProgram("Профи", i, j, j > 2 && j <= 4 ? pulls + 2 : pullsLvl2 + 1));
 
                     pulls = pullsLvl3;
-                    LevelProgram.Add(new LevelProgram("Турникмен", i, j, j > 2 && j <= 4 ? pulls + 3 : pullsLvl3 + 2));
+                    LevelProgram.Add(new LevelProgram("Турникмен", i, j, j > 2 && j <= 5 ? pulls + 3 : pullsLvl3 + 2));
                     
                     date = date.AddDays(1);
                 }
