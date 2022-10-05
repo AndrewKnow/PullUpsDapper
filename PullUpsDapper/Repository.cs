@@ -206,7 +206,6 @@ namespace PullUpsDapper
                                 "on plan.week = fact.week";
 
                 var lookup = new Dictionary<int, PlanPulls>();
-                //var lookup2 = new Dictionary<int, FactPulls>();
                 _ = conn.Query<PlanPulls, FactPulls, PlanPulls>(sqlQuery, (p, f) => {
 
                     PlanPulls planPulls;
@@ -214,15 +213,10 @@ namespace PullUpsDapper
                     {
                         lookup.Add(p.Week, planPulls = p);
                     }
-                    //FactPulls factPulls;
+ 
                     if (planPulls.Facts == null)
                         planPulls.Facts = new List<FactPulls>();
                     planPulls.Facts.Add(f);
-                    //if (!lookup2.TryGetValue(f.Week, out factPulls))
-                    //{
-                    //    lookup2.Add(f.Week, factPulls = f);
-                    //    planPulls.Facts.Add(factPulls);
-                    //}
 
                     return planPulls;
                     }, new { @user_id = userId, @level = lvl }, splitOn: "Id"
