@@ -191,10 +191,10 @@ namespace PullUpsDapper
 
                                 StringBuilder sb = new StringBuilder();
                                 var i = 0;
-                                string tabs = new string('\t', 7);
-                                string tabs2 = new string('\t', 6);
-                                string tabs3 = new string('\t', 11);
-                                string tabs4 = new string('\t', 12);
+                                string tabs7 = new string('\t', 7);
+                                string tabs6 = new string('\t', 6);
+                                string tabs11 = new string('\t', 11);
+                                string tabs12 = new string('\t', 12);
                                 foreach (var item in userDayProgram)
                                 {
                                     if (i == 0)
@@ -205,20 +205,20 @@ namespace PullUpsDapper
                                     if (item.Pulls.ToString().Length == 1)
                                     {
                                         sb.Append(
-                                            $"\u007C{tabs}{item.Approach}{tabs2}" +
+                                            $"\u007C{tabs7}{item.Approach}{tabs6}" +
                                             $"\u007C" +
-                                            $"{tabs3}{item.Pulls}" +
-                                            $"{tabs4}" +
+                                            $"{tabs11}{item.Pulls}" +
+                                            $"{tabs12}" +
                                             $"\u007C\n");
                                         i++;
                                     }
                                     else
                                     {
                                         sb.Append(
-                                            $"\u007C{tabs}{item.Approach}{tabs2}" +
+                                            $"\u007C{tabs7}{item.Approach}{tabs6}" +
                                             $"\u007C" +
-                                            $"{tabs3}{item.Pulls}" +
-                                            $"{tabs3}" +
+                                            $"{tabs11}{item.Pulls}" +
+                                            $"{tabs11}" +
                                             $"\u007C\n");
                                         i++;
                                     }
@@ -317,9 +317,59 @@ namespace PullUpsDapper
 
                             if (level != null && count == 1)
                             {
-                                var result = userRepository.UserReport(userId, level);
+                                StringBuilder sb = new StringBuilder();
+                                var userReport = userRepository.UserReport(userId, level);
+                                var i = 0;
+                                string tabs = "";
+                                string tabs4 = new string('\t', 4);
+                                string tabs5 = new string('\t', 5);
+                                string tabs7 = new string('\t', 7);
+                                string tabs6 = new string('\t', 6);
+                                string tabs3 = new string('\t', 3);
+                                string tabs2 = new string('\t', 2);
+                                string tabs1 = new string('\t', 1);
+                                string tabs13 = new string('\t', 13);
+                                string tabs12 = new string('\t', 12);
+                                sb.Append("\u007CНеделя\u007CПлан\u007CФакт\n");
+                                foreach (var item in userReport)
+                                {
+                                    string emoji="";
+                                    if (item.Fact < item.Plan) emoji = "😤";
+                                    if (item.Fact == item.Plan) emoji = "💪🏻";
+                                    if (item.Fact > item.Plan) emoji = "🦾";
+                                    //tabs = item.Fact == 0 ? tabs4 : tabs1;
+                                    if (item.Fact >= 100) tabs = tabs2;
+                                    if (item.Fact >= 10 && item.Fact <=99) tabs = tabs6;
+                                    if (item.Fact < 10 ) tabs = tabs7;
 
+                                    i++;
+                                    if (i == 1 || i < 10)
+                                    {
+                                        if (item.Plan > 99 && item.Fact > 99)
+                                            sb.Append($"\u007C{tabs6}{item.Week}{tabs7}\u007C{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                        if (item.Plan <= 99 && item.Fact <= 99)
+                                            sb.Append($"\u007C{tabs6}{item.Week}{tabs7}\u007C {tabs1}{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                        if (item.Plan > 99 && item.Fact <= 99)
+                                            sb.Append($"\u007C{tabs6}{item.Week}{tabs7}\u007C{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                        if (item.Plan <= 99 && item.Fact > 99)
+                                            sb.Append($"\u007C{tabs6}{item.Week}{tabs7}\u007C {tabs1}{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                    }
+                                    else
+                                    {
+                                        if (item.Plan > 99 && item.Fact > 99)
+                                            sb.Append($"\u007C{tabs5}{item.Week}{tabs6}\u007C{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                        if (item.Plan <= 99 && item.Fact <= 99)
+                                            sb.Append($"\u007C{tabs5}{item.Week}{tabs6}\u007C {tabs1}{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                        if (item.Plan > 99 && item.Fact <= 99)
+                                            sb.Append($"\u007C{tabs5}{item.Week}{tabs6}\u007C{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                        if (item.Plan <= 99 && item.Fact > 99)
+                                            sb.Append($"\u007C{tabs5}{item.Week}{tabs6}\u007C {tabs1}{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                    }
+                                }
 
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                sb.ToString(),
+                                cancellationToken: cancellationToken);
                             }
                             else
                             {
