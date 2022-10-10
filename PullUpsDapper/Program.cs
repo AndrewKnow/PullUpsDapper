@@ -20,7 +20,10 @@ namespace PullUpsDapper
         {
             string Key = Password.Bot();
             var bot = new TelegramBotClient(Key);
+
             UserDayProgram.DayReport = false;
+            UserDayProgram.DayReportPlus = false;
+
             Console.WriteLine("Включён бот " + bot.GetMeAsync().Result.FirstName);
 
             using var cts = new CancellationTokenSource();
@@ -111,6 +114,36 @@ namespace PullUpsDapper
                                 "Введено не число, ввод данных отменён!",
                                 cancellationToken: cancellationToken);
                             UserDayProgram.DayReport = false;
+                        }
+                    }
+
+                    // 101022.2 тестировать метод + повторения DayResultPlus
+                    if (message.Text.Substring(0, 1) == "+")
+                    {
+                        bool pullsCheck = int.TryParse(message.Text.Substring(1, message.Text.Length - 1), out int result);
+                        if (pullsCheck)
+                        {
+                            if (level != null && count == 1)
+                            {
+                                await botClient.SendTextMessageAsync(message.Chat,
+                                    "Сохранение данных о выполненных повторениях...",
+                                    cancellationToken: cancellationToken);
+
+                                string checkResult = userRepository.DayResultPlus(userId, result);
+
+                                if (result >= 1 && result <= 4)
+                                {
+                                    await botClient.SendTextMessageAsync(message.Chat,
+                                        $"Добавил {result} повторения к сегодняшнему результату, ты {checkResult} программу на сегодня",
+                                        cancellationToken: cancellationToken);
+                                }
+                                else
+                                {
+                                    await botClient.SendTextMessageAsync(message.Chat,
+                                        $"Записал {result} повторений к сегодняшнему результату, ты {checkResult} программу на сегодня",
+                                        cancellationToken: cancellationToken);
+                                }
+                            }
                         }
                     }
 

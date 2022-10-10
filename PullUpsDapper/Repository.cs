@@ -20,6 +20,7 @@ namespace PullUpsDapper
         void CreateTrainingProgram(string lvl, long userId);
         List<UserDayProgram> DayStatus(long userId, string lvl);
         string DayResult(long userId, int pulls);
+        string DayResultPlus(long userId, int pulls);
         void CreateLevelProgram();
         IEnumerable<ForUserReport> UserReport(long userId, string lvl);
         void DeleteUserProgram(long userId);
@@ -96,6 +97,10 @@ namespace PullUpsDapper
             ConnString = DBConnection.ConnectionString();
             using var conn = new NpgsqlConnection(ConnString);
             string sqlQuery;
+
+            sqlQuery = @"UPDATE pulls.day_result Set pulls = @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
+            conn.Execute(sqlQuery, new { @pulls = pulls, @user_id = userId, @date = date });
+
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
                               "and level = (Select level From pulls.users Where user_id = @user_id)::text ;";
@@ -114,11 +119,46 @@ namespace PullUpsDapper
                 checkResult = "выполнил";
             }
 
-            sqlQuery = @"UPDATE pulls.day_result Set pulls = @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
-            conn.Execute(sqlQuery, new { @pulls = pulls, @user_id = userId, @date = date });
+
 
             UserDayProgram.DayReport = false;
             conn.Close();
+
+            return checkResult;
+        }
+        public string DayResultPlus(long userId, int pulls)
+        {
+
+            var date = DateTime.Now;
+            string checkResult = "";
+            ConnString = DBConnection.ConnectionString();
+            using var conn = new NpgsqlConnection(ConnString);
+            string sqlQuery;
+
+            // 101022.2 тестировать метод + повторения DayResultPlus
+
+            sqlQuery = @"UPDATE pulls.day_result Set pulls = pulls + @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
+            conn.Execute(sqlQuery, new { @pulls = pulls, @user_id = userId, @date = date });
+
+
+            sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
+                              "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
+                              "and level = (Select level From pulls.users Where user_id = @user_id)::text ;";
+            int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date });
+
+            if (pulls < sumPullsFromProgram && sumPullsFromProgram > 0)
+            {
+                checkResult = "не доделал";
+            }
+            else if (pulls > sumPullsFromProgram && sumPullsFromProgram > 0)
+            {
+                checkResult = "перевыполнил";
+            }
+            else if (sumPullsFromProgram > 0)
+            {
+                checkResult = "выполнил";
+            }
+
 
             return checkResult;
         }
