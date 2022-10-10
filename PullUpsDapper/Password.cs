@@ -12,11 +12,8 @@ namespace PullUpsDapper
         public static string Bot()
         {
             StreamReader f = new("Key.txt");
-            while (!f.EndOfStream)
-            {
+            if (!f.EndOfStream)
                 Key = f.ReadLine();
-                break;
-            }
             f.Close();
             return Key;
         }

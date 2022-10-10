@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Npgsql;
 using Dapper;
 using System.Collections.Generic;
+using PullUpsDapper.Users;
+using System.Collections;
 
 namespace PullUpsDapper
 {
@@ -199,7 +201,12 @@ namespace PullUpsDapper
                 {
                     foreach (var fact in plan.Facts)
                     {
-                        report.Add(new ForUserReport(plan.Week, plan.PullsPlan, fact.PullsFact));
+                        var sqlDateBegin = @"SELECT TO_CHAR(min(date):: DATE, 'dd.mm.yyyy') FROM pulls.day_result  WHERE day_result.user_id = @user_id and day_result.week = @week;";
+                        var sqlDateEnd = @"SELECT TO_CHAR(max(date):: DATE, 'dd.mm.yyyy') FROM pulls.day_result  WHERE day_result.user_id = @user_id and day_result.week = @week;";
+                        var dateBegin = conn.ExecuteScalar<string>(sqlDateBegin, new { user_id = userId, @week = plan.Week });
+                        var dateEnd = conn.ExecuteScalar<string>(sqlDateEnd, new { user_id = userId, @week = plan.Week });
+
+                        report.Add(new ForUserReport(plan.Week, plan.PullsPlan, fact.PullsFact, dateBegin, dateEnd));
                     }
                 }
                 conn.Close();

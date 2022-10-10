@@ -8,6 +8,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Text;
+using PullUpsDapper.Users;
 
 namespace PullUpsDapper
 {
@@ -55,7 +56,7 @@ namespace PullUpsDapper
                 Message message = update.Message;
 
                 UserRepository userRepository = new();
-                User user = new User();
+                Users.User user = new ();
 
                 if (update.Type == UpdateType.CallbackQuery)
                 {
@@ -69,6 +70,8 @@ namespace PullUpsDapper
                                 cancellationToken: cancellationToken);
                             break;
                         case "Отмена":
+                            await botClient.SendTextMessageAsync(callbackQuery.Message.Chat, "Действие отменено",
+                                cancellationToken: cancellationToken);
                             break;
                     }
                 }
@@ -162,7 +165,7 @@ namespace PullUpsDapper
                             }
                             break;
 
-                        case "✔️Отчёт о выполнении":
+                        case "✔️Отчёт о выполнении за сегодня":
 
                             if (level != null && count == 1)
                             {
@@ -191,35 +194,34 @@ namespace PullUpsDapper
 
                                 StringBuilder sb = new StringBuilder();
                                 var i = 0;
-                                string tabs7 = new string('\t', 7);
-                                string tabs6 = new string('\t', 6);
-                                string tabs11 = new string('\t', 11);
-                                string tabs12 = new string('\t', 12);
+
+                                Func<int, string> whiteSpace = x => new string('\t', x);
+
                                 foreach (var item in userDayProgram)
                                 {
                                     if (i == 0)
                                     {
-                                        sb.Append($"\u007CПодход\u007CПовторения\u007C\n");
+                                        sb.Append($"|Подход|Повторения|\n");
                                     }    
 
                                     if (item.Pulls.ToString().Length == 1)
                                     {
                                         sb.Append(
-                                            $"\u007C{tabs7}{item.Approach}{tabs6}" +
-                                            $"\u007C" +
-                                            $"{tabs11}{item.Pulls}" +
-                                            $"{tabs12}" +
-                                            $"\u007C\n");
+                                            $"|{whiteSpace(7)}{item.Approach}{whiteSpace(6)}" +
+                                            $"|" +
+                                            $"{whiteSpace(11)}{item.Pulls}" +
+                                            $"{whiteSpace(12)}" +
+                                            $"|\n");
                                         i++;
                                     }
                                     else
                                     {
                                         sb.Append(
-                                            $"\u007C{tabs7}{item.Approach}{tabs6}" +
-                                            $"\u007C" +
-                                            $"{tabs11}{item.Pulls}" +
-                                            $"{tabs11}" +
-                                            $"\u007C\n");
+                                            $"|{whiteSpace(7)}{item.Approach}{whiteSpace(6)}" +
+                                            $"|" +
+                                            $"{whiteSpace(11)}{item.Pulls}" +
+                                            $"{whiteSpace(12)}" +
+                                            $"|\n");
                                         i++;
                                     }
                                 }
@@ -313,7 +315,7 @@ namespace PullUpsDapper
                             cancellationToken: cancellationToken);
                             break;
 
-                        case "📊График":
+                        case "📊График (план/факт)":
 
                             if (level != null && count == 1)
                             {
@@ -321,49 +323,43 @@ namespace PullUpsDapper
                                 var userReport = userRepository.UserReport(userId, level);
                                 var i = 0;
                                 string tabs = "";
-                                string tabs4 = new string('\t', 4);
-                                string tabs5 = new string('\t', 5);
-                                string tabs7 = new string('\t', 7);
-                                string tabs6 = new string('\t', 6);
-                                string tabs3 = new string('\t', 3);
-                                string tabs2 = new string('\t', 2);
-                                string tabs1 = new string('\t', 1);
-                                string tabs13 = new string('\t', 13);
-                                string tabs12 = new string('\t', 12);
-                                sb.Append("\u007CНеделя\u007CПлан\u007CФакт\n");
+
+                                Func<int, string> whiteSpace = x => new string('\t', x);
+                   
+                                sb.Append($"|Неделя|{whiteSpace(14)}Период{whiteSpace(13)}|{whiteSpace(1)}План{whiteSpace(1)}|{whiteSpace(1)}Факт{whiteSpace(7)}|\n");
+    
                                 foreach (var item in userReport)
                                 {
                                     string emoji="";
                                     if (item.Fact < item.Plan) emoji = "😤";
                                     if (item.Fact == item.Plan) emoji = "💪🏻";
                                     if (item.Fact > item.Plan) emoji = "🦾";
-                                    //tabs = item.Fact == 0 ? tabs4 : tabs1;
-                                    if (item.Fact >= 100) tabs = tabs2;
-                                    if (item.Fact >= 10 && item.Fact <=99) tabs = tabs6;
-                                    if (item.Fact < 10 ) tabs = tabs7;
+                                    if (item.Fact >= 100) tabs = whiteSpace(2);
+                                    if (item.Fact >= 10 && item.Fact <=99) tabs = whiteSpace(5);
+                                    if (item.Fact < 10 ) tabs = whiteSpace(7);
 
                                     i++;
                                     if (i == 1 || i < 10)
                                     {
                                         if (item.Plan > 99 && item.Fact > 99)
-                                            sb.Append($"\u007C{tabs6}{item.Week}{tabs7}\u007C{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
-                                        if (item.Plan <= 99 && item.Fact <= 99)
-                                            sb.Append($"\u007C{tabs6}{item.Week}{tabs7}\u007C {tabs1}{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
-                                        if (item.Plan > 99 && item.Fact <= 99)
-                                            sb.Append($"\u007C{tabs6}{item.Week}{tabs7}\u007C{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
-                                        if (item.Plan <= 99 && item.Fact > 99)
-                                            sb.Append($"\u007C{tabs6}{item.Week}{tabs7}\u007C {tabs1}{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                            sb.Append($"|{whiteSpace(6)}{item.Week}{whiteSpace(7)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
+                                        if (item.Plan <= 99 && item.Fact <= 99)        
+                                            sb.Append($"|{whiteSpace(6)}{item.Week}{whiteSpace(7)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(4)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
+                                        if (item.Plan > 99 && item.Fact <= 99)         
+                                            sb.Append($"|{whiteSpace(6)}{item.Week}{whiteSpace(7)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
+                                        if (item.Plan <= 99 && item.Fact > 99)        
+                                            sb.Append($"|{whiteSpace(6)}{item.Week}{whiteSpace(7)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(4)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
                                     }
                                     else
                                     {
                                         if (item.Plan > 99 && item.Fact > 99)
-                                            sb.Append($"\u007C{tabs5}{item.Week}{tabs6}\u007C{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                            sb.Append($"|{whiteSpace(5)}{item.Week}{whiteSpace(6)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
                                         if (item.Plan <= 99 && item.Fact <= 99)
-                                            sb.Append($"\u007C{tabs5}{item.Week}{tabs6}\u007C {tabs1}{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                            sb.Append($"|{whiteSpace(5)}{item.Week}{whiteSpace(6)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
                                         if (item.Plan > 99 && item.Fact <= 99)
-                                            sb.Append($"\u007C{tabs5}{item.Week}{tabs6}\u007C{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                            sb.Append($"|{whiteSpace(5)}{item.Week}{whiteSpace(6)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
                                         if (item.Plan <= 99 && item.Fact > 99)
-                                            sb.Append($"\u007C{tabs5}{item.Week}{tabs6}\u007C {tabs1}{item.Plan}{tabs3}\u007C{tabs2}{item.Fact}{tabs}{emoji}\n");
+                                            sb.Append($"|{whiteSpace(5)}{item.Week}{whiteSpace(6)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
                                     }
                                 }
 
@@ -400,10 +396,9 @@ namespace PullUpsDapper
                        new[]
                        {
                             new KeyboardButton [] { "Администратор" },
-                            //new KeyboardButton [] { "🦾Создать программу тренировок" },
-                            new KeyboardButton [] { "✔️Отчёт о выполнении"},
+                            new KeyboardButton [] { $"✔️Отчёт о выполнении за сегодня" },
                             new KeyboardButton [] { "💪Моя задача на сегодня" },
-                            new KeyboardButton [] { "📊График" },
+                            new KeyboardButton [] { "📊График (план/факт)" },
                             new KeyboardButton [] { "❌Удалить программу" },
                        })
                     {
@@ -416,10 +411,9 @@ namespace PullUpsDapper
                     replyKeyboardMarkup = new(
                        new[]
                        {
-                            new KeyboardButton [] { "🦾Создать программу тренировок" },
                             new KeyboardButton [] { "✔️Отчёт о выполнении"},
                             new KeyboardButton [] { "💪Моя задача на сегодня" },
-                            new KeyboardButton [] { "📊График" },
+                            new KeyboardButton [] { "📊График (план/факт)" },
                             new KeyboardButton [] { "❌Удалить программу" },
                        })
                     {
@@ -456,9 +450,9 @@ namespace PullUpsDapper
                     replyKeyboardMarkup = new(
                        new[]
                        {
-                            new KeyboardButton [] { "✔️Отчёт о выполнении"},
+                            new KeyboardButton [] { "✔️Отчёт о выполнении за сегодня"},
                             new KeyboardButton [] { "💪Моя задача на сегодня" },
-                            new KeyboardButton [] { "📊График" },
+                            new KeyboardButton [] { "📊График (план/факт)" },
                             new KeyboardButton [] { "❌Удалить программу" },
                        })
                     {
@@ -476,6 +470,5 @@ namespace PullUpsDapper
             return await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "..."
                          , replyMarkup: new ReplyKeyboardRemove());
         }
-
     }
 }

@@ -23,7 +23,6 @@ namespace PullUpsDapper
               _dbName,
               _port,
               password);
-
             return connString;
         }
     }
