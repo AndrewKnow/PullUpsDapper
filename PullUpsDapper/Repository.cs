@@ -2,6 +2,8 @@
 using Npgsql;
 using Dapper;
 using PullUpsDapper.Users;
+using PullUpsDapper.DayResults;
+using PullUpsDapper.LevelPrograms;
 
 namespace PullUpsDapper
 {
