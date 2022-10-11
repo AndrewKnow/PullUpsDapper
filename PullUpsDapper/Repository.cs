@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
 using Npgsql;
 using Dapper;
-using System.Collections.Generic;
 using PullUpsDapper.Users;
-using System.Collections;
 
 namespace PullUpsDapper
 {

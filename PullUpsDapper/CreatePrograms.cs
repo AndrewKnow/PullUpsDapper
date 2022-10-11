@@ -1,54 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using PullUpsDapper.TrainingPrograms;
+using PullUpsDapper.LevelPrograms;
+using PullUpsDapper.DayResults;
 
 namespace PullUpsDapper
 {
-    public class TrainingProgram
-    {
-        public long Id { get; set; }
-        public int Week { get; set; }
-        public int Approach { get; set; }
-        public int Pulls { get; set; }
-        public TrainingProgram(long id, int week, int approach, int pulls)
-        {
-            Id = id;
-            Week = week;
-            Approach = approach;
-            Pulls = pulls;
-        }
-    }
-    public class LevelProgram
-    {
-        public string Level { get; set; }
-        public int Week { get; set; }
-        public int Approach { get; set; }
-        public int Pulls { get; set; }
-        public LevelProgram(string level, int week, int approach, int pulls)
-        {
-            Level = level;
-            Week = week;
-            Approach = approach;
-            Pulls = pulls;
-        }
-    }
-    public class DayResult
-    {
-        public long Id { get; set; }
-        public int Week { get; set; }
-        public DateTime Date { get; set; }
-        public int Pulls  { get; set; }
-        public DayResult(long id, int week, DateTime date, int pulls)
-        {
-            Id = id;
-            Week = week;
-            Date = date;
-            Pulls = pulls;
-        }
-    }
-
     public class CreateProgram
     {
         public static List<TrainingProgram> UserProgram = new List<TrainingProgram>();

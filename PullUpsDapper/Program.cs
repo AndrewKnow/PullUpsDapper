@@ -1,7 +1,4 @@
 ﻿
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Extensions.Polling;
 using Telegram.Bot.Types;
@@ -23,7 +20,6 @@ namespace PullUpsDapper
 
             UserDayProgram.DayReport = false;
          
-
             Console.WriteLine("Включён бот " + bot.GetMeAsync().Result.FirstName);
 
             using var cts = new CancellationTokenSource();
