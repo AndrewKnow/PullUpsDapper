@@ -108,18 +108,16 @@ namespace PullUpsDapper
 
             if (pulls < sumPullsFromProgram && sumPullsFromProgram > 0)
             {
-                checkResult = "не доделал";
+                checkResult = "не доделал программу за сегодня (осталось 👉🏻 {sumPullsFromProgram - pulls})";
             }
             else if (pulls > sumPullsFromProgram && sumPullsFromProgram > 0)
             {
-                checkResult = "перевыполнил";
+                checkResult = "перевыполнил программу за сегодня (сверх плана 🦾 {pulls - sumPullsFromProgram})";
             }
             else if (sumPullsFromProgram > 0)
             {
-                checkResult = "выполнил";
+                checkResult = "выполнил программу за сегодня 💪🏻";
             }
-
-
 
             UserDayProgram.DayReport = false;
             conn.Close();
@@ -140,7 +138,6 @@ namespace PullUpsDapper
             sqlQuery = @"UPDATE pulls.day_result Set pulls = pulls + @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
             conn.Execute(sqlQuery, new { @pulls = pulls, @user_id = userId, @date = date });
 
-
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
                               "and level = (Select level From pulls.users Where user_id = @user_id)::text ;";
@@ -152,17 +149,16 @@ namespace PullUpsDapper
 
             if (sumPullsFromResult < sumPullsFromProgram && sumPullsFromProgram > 0)
             {
-                checkResult = "не доделал";
+                checkResult = $"не доделал программу на сегодня (осталось 👉🏻 {sumPullsFromProgram - sumPullsFromResult})";
             }
             else if (sumPullsFromResult > sumPullsFromProgram && sumPullsFromProgram > 0)
             {
-                checkResult = "перевыполнил";
+                checkResult = $"перевыполнил программу на сегодня (сверх плана 🦾 {sumPullsFromResult - sumPullsFromProgram})";
             }
             else if (sumPullsFromProgram > 0)
             {
-                checkResult = "выполнил";
+                checkResult = $"выполнил программу на сегодня 💪🏻";
             }
-
 
             return checkResult;
         }
@@ -203,6 +199,23 @@ namespace PullUpsDapper
             }
             conn.Close();
             return userDayProgram;
+        }
+
+        public (int fact, int plan) FactPlanToday(long userId, string lvl)
+        {
+            ConnString = DBConnection.ConnectionString();
+            var date = DateTime.Now;
+            using var conn = new NpgsqlConnection(ConnString);
+
+            string sqlQuery = "SELECT sum(a.pulls)" +
+                  " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.week = b.week " +
+                  " WHERE a.level = @level::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
+
+            int plan = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date, @level = lvl });
+            int fact = conn.ExecuteScalar<int>("SELECT pulls FROM  pulls.day_result WHERE day_result.user_id = @user_id and date = CAST(@date as Date);", new { @user_id = userId, @date = date });
+
+            conn.Close();
+            return (fact, plan);
         }
 
         public IEnumerable<ForUserReport> UserReport(long userId, string lvl)

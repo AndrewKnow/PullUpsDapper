@@ -96,13 +96,13 @@ namespace PullUpsDapper
                             if (result >= 1 && result <= 4)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    $"Записал {result} повторения за сегодня, ты {checkResult} программу на сегодня",
+                                    $"Записал {result} повторения за сегодня, ты {checkResult}",
                                     cancellationToken: cancellationToken);
                             }
                             else
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    $"Записал {result} повторений за сегодня, ты {checkResult} программу на сегодня",
+                                    $"Записал {result} повторений за сегодня, ты {checkResult}",
                                     cancellationToken: cancellationToken);
                             }
 
@@ -134,19 +134,19 @@ namespace PullUpsDapper
                                 if (result == 1)
                                 {
                                     await botClient.SendTextMessageAsync(message.Chat,
-                                        $"Добавил {result} повторение к сегодняшнему результату, ты {checkResult} программу на сегодня",
+                                        $"Добавил {result} повторение к сегодняшнему результату, ты {checkResult}",
                                         cancellationToken: cancellationToken);
                                 }
                                 else if (result >= 2 && result <= 4)
                                 {
                                     await botClient.SendTextMessageAsync(message.Chat,
-                                        $"Добавил {result} повторения к сегодняшнему результату, ты {checkResult} программу на сегодня",
+                                        $"Добавил {result} повторения к сегодняшнему результату, ты {checkResult}",
                                         cancellationToken: cancellationToken);
                                 }
                                 else
                                 {
                                     await botClient.SendTextMessageAsync(message.Chat,
-                                        $"Записал {result} повторений к сегодняшнему результату, ты {checkResult} программу на сегодня",
+                                        $"Записал {result} повторений к сегодняшнему результату, ты {checkResult}",
                                         cancellationToken: cancellationToken);
                                 }
                             }
@@ -195,12 +195,12 @@ namespace PullUpsDapper
                             if (userId == 1209629878)
                             {
                                 await RemoveReplyKeboard(botClient, message);
-                                await SendReplyKeboard(botClient, message, 5);
+                                await SendReplyKeboard(botClient, message, 4);
                             }
                             else
                             {
                                 await RemoveReplyKeboard(botClient, message);
-                                await SendReplyKeboard(botClient, message, 0);
+                                await SendReplyKeboard(botClient, message, 3);
                             }
                             break;
 
@@ -264,6 +264,9 @@ namespace PullUpsDapper
                                         i++;
                                     }
                                 }
+
+                                var (fact, plan) = userRepository.FactPlanToday(userId, level);
+                                sb.Append($"\nВыполнено (повторений): {fact} / {plan}");
 
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     sb.ToString(),
@@ -430,36 +433,6 @@ namespace PullUpsDapper
             ReplyKeyboardMarkup? replyKeyboardMarkup = null;
             switch (lvl)
             {
-                case 5:
-                    replyKeyboardMarkup = new(
-                       new[]
-                       {
-                            new KeyboardButton [] { "Администратор" },
-                            new KeyboardButton [] { $"✔️Отчёт о выполнении за сегодня" },
-                            new KeyboardButton [] { "💪Моя задача на сегодня" },
-                            new KeyboardButton [] { "📊График (план/факт)" },
-                            new KeyboardButton [] { "❌Удалить программу" },
-                       })
-                    {
-
-                        ResizeKeyboard = true
-                    };
-                    break;
-
-                case 0:
-                    replyKeyboardMarkup = new(
-                       new[]
-                       {
-                            new KeyboardButton [] { "✔️Отчёт о выполнении"},
-                            new KeyboardButton [] { "💪Моя задача на сегодня" },
-                            new KeyboardButton [] { "📊График (план/факт)" },
-                            new KeyboardButton [] { "❌Удалить программу" },
-                       })
-                    {
-
-                        ResizeKeyboard = true
-                    };
-                    break;
                 case 1:
                     replyKeyboardMarkup = new(
                        new[]
@@ -485,11 +458,28 @@ namespace PullUpsDapper
                         ResizeKeyboard = true
                     };
                     break;
+
                 case 3:
                     replyKeyboardMarkup = new(
                        new[]
                        {
                             new KeyboardButton [] { "✔️Отчёт о выполнении за сегодня"},
+                            new KeyboardButton [] { "💪Моя задача на сегодня" },
+                            new KeyboardButton [] { "📊График (план/факт)" },
+                            new KeyboardButton [] { "❌Удалить программу" },
+                       })
+                    {
+
+                        ResizeKeyboard = true
+                    };
+                    break;
+
+                case 4:
+                    replyKeyboardMarkup = new(
+                       new[]
+                       {
+                            new KeyboardButton [] { "Администратор" },
+                            new KeyboardButton [] { $"✔️Отчёт о выполнении за сегодня" },
                             new KeyboardButton [] { "💪Моя задача на сегодня" },
                             new KeyboardButton [] { "📊График (план/факт)" },
                             new KeyboardButton [] { "❌Удалить программу" },
