@@ -487,7 +487,7 @@ namespace PullUpsDapper
                     break;
             }
             return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
-                text: "👇🏻", replyMarkup: replyKeyboardMarkup);
+                text: "...", replyMarkup: replyKeyboardMarkup);
         }
 
         static async Task<Message> RemoveReplyKeboard(ITelegramBotClient botClient, Message message)
