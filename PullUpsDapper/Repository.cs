@@ -24,6 +24,7 @@ namespace PullUpsDapper
         void CreateLevelProgram();
         IEnumerable<ForUserReport> UserReport(long userId, string lvl);
         void DeleteUserProgram(long userId);
+        (int fact, int plan) FactPlanToday(long userId, string lvl);
     }
     public class UserRepository : IUser
     {
