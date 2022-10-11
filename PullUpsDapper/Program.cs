@@ -487,12 +487,12 @@ namespace PullUpsDapper
                     break;
             }
             return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
-                text: "...", replyMarkup: replyKeyboardMarkup);
+                text: "🤖 загружаю информацию...", replyMarkup: replyKeyboardMarkup);
         }
 
         static async Task<Message> RemoveReplyKeboard(ITelegramBotClient botClient, Message message)
         {
-            return await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "..."
+            return await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "🤖 работаю"
                          , replyMarkup: new ReplyKeyboardRemove());
         }
     }
