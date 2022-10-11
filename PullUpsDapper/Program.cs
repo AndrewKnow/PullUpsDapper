@@ -240,7 +240,7 @@ namespace PullUpsDapper
                                 {
                                     if (i == 0)
                                     {
-                                        sb.Append($"|Подход|Повторения|\n");
+                                        sb.Append($"{whiteSpace(6)}Подход{whiteSpace(4)}Повторения \n");
                                     }    
 
                                     if (item.Pulls.ToString().Length == 1)
@@ -365,7 +365,7 @@ namespace PullUpsDapper
 
                                 Func<int, string> whiteSpace = x => new string('\t', x);
                    
-                                sb.Append($"|Неделя|{whiteSpace(14)}Период{whiteSpace(13)}|{whiteSpace(1)}План{whiteSpace(1)}|{whiteSpace(1)}Факт{whiteSpace(7)}|\n");
+                                sb.Append($"{whiteSpace(2)}Нед.{whiteSpace(18)}Период{whiteSpace(13)}{whiteSpace(3)}План{whiteSpace(1)}{whiteSpace(3)}Факт{whiteSpace(6)}\n");
     
                                 foreach (var item in userReport)
                                 {
@@ -374,31 +374,31 @@ namespace PullUpsDapper
                                     if (item.Fact == item.Plan) emoji = "💪🏻";
                                     if (item.Fact > item.Plan) emoji = "🦾";
                                     if (item.Fact >= 100) tabs = whiteSpace(2);
-                                    if (item.Fact >= 10 && item.Fact <=99) tabs = whiteSpace(5);
-                                    if (item.Fact < 10 ) tabs = whiteSpace(7);
+                                    if (item.Fact >= 10 && item.Fact <=99) tabs = whiteSpace(4);
+                                    if (item.Fact < 10 ) tabs = whiteSpace(6);
 
                                     i++;
                                     if (i == 1 || i < 10)
                                     {
                                         if (item.Plan > 99 && item.Fact > 99)
-                                            sb.Append($"|{whiteSpace(6)}{item.Week}{whiteSpace(7)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
+                                            sb.Append($"|{whiteSpace(3)}{item.Week}{whiteSpace(4)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(1)}{item.Fact}{tabs}{emoji}\n");
                                         if (item.Plan <= 99 && item.Fact <= 99)        
-                                            sb.Append($"|{whiteSpace(6)}{item.Week}{whiteSpace(7)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(4)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
+                                            sb.Append($"|{whiteSpace(3)}{item.Week}{whiteSpace(4)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(4)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}\n");
                                         if (item.Plan > 99 && item.Fact <= 99)         
-                                            sb.Append($"|{whiteSpace(6)}{item.Week}{whiteSpace(7)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
+                                            sb.Append($"|{whiteSpace(3)}{item.Week}{whiteSpace(4)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}\n");
                                         if (item.Plan <= 99 && item.Fact > 99)        
-                                            sb.Append($"|{whiteSpace(6)}{item.Week}{whiteSpace(7)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(4)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
+                                            sb.Append($"|{whiteSpace(3)}{item.Week}{whiteSpace(4)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(4)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}\n");
                                     }
                                     else
                                     {
                                         if (item.Plan > 99 && item.Fact > 99)
-                                            sb.Append($"|{whiteSpace(5)}{item.Week}{whiteSpace(6)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
+                                            sb.Append($"|{whiteSpace(2)}{item.Week}{whiteSpace(3)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}\n");
                                         if (item.Plan <= 99 && item.Fact <= 99)
-                                            sb.Append($"|{whiteSpace(5)}{item.Week}{whiteSpace(6)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
+                                            sb.Append($"|{whiteSpace(2)}{item.Week}{whiteSpace(3)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(4)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}\n");
                                         if (item.Plan > 99 && item.Fact <= 99)
-                                            sb.Append($"|{whiteSpace(5)}{item.Week}{whiteSpace(6)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
+                                            sb.Append($"|{whiteSpace(2)}{item.Week}{whiteSpace(3)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}\n");
                                         if (item.Plan <= 99 && item.Fact > 99)
-                                            sb.Append($"|{whiteSpace(5)}{item.Week}{whiteSpace(6)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(2)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}|\n");
+                                            sb.Append($"|{whiteSpace(2)}{item.Week}{whiteSpace(3)}|{item.DateBegin}-{item.DateEnd}|{whiteSpace(4)}{item.Plan}{whiteSpace(3)}|{whiteSpace(2)}{item.Fact}{tabs}{emoji}\n");
                                     }
                                 }
 
