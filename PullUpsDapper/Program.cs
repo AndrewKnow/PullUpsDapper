@@ -22,7 +22,7 @@ namespace PullUpsDapper
             var bot = new TelegramBotClient(Key);
 
             UserDayProgram.DayReport = false;
-            UserDayProgram.DayReportPlus = false;
+         
 
             Console.WriteLine("Включён бот " + bot.GetMeAsync().Result.FirstName);
 
@@ -131,7 +131,13 @@ namespace PullUpsDapper
 
                                 string checkResult = userRepository.DayResultPlus(userId, result);
 
-                                if (result >= 1 && result <= 4)
+                                if (result == 1)
+                                {
+                                    await botClient.SendTextMessageAsync(message.Chat,
+                                        $"Добавил {result} повторение к сегодняшнему результату, ты {checkResult} программу на сегодня",
+                                        cancellationToken: cancellationToken);
+                                }
+                                else if (result >= 2 && result <= 4)
                                 {
                                     await botClient.SendTextMessageAsync(message.Chat,
                                         $"Добавил {result} повторения к сегодняшнему результату, ты {checkResult} программу на сегодня",

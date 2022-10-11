@@ -146,11 +146,15 @@ namespace PullUpsDapper
                               "and level = (Select level From pulls.users Where user_id = @user_id)::text ;";
             int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date });
 
-            if (pulls < sumPullsFromProgram && sumPullsFromProgram > 0)
+            sqlQuery = @"Select pulls From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id;";
+
+            int sumPullsFromResult = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date });
+
+            if (sumPullsFromResult < sumPullsFromProgram && sumPullsFromProgram > 0)
             {
                 checkResult = "не доделал";
             }
-            else if (pulls > sumPullsFromProgram && sumPullsFromProgram > 0)
+            else if (sumPullsFromResult > sumPullsFromProgram && sumPullsFromProgram > 0)
             {
                 checkResult = "перевыполнил";
             }
