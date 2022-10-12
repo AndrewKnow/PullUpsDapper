@@ -4,8 +4,9 @@ using Dapper;
 using PullUpsDapper.Users;
 using PullUpsDapper.DayResults;
 using PullUpsDapper.LevelPrograms;
+using PullUpsDapper.TrainingPrograms;
 
-namespace PullUpsDapper
+namespace PullUpsDapper.DBrepository
 {
     public interface IUser
     {
@@ -96,12 +97,12 @@ namespace PullUpsDapper
             string sqlQuery;
 
             sqlQuery = @"UPDATE pulls.day_result Set pulls = @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
-            conn.Execute(sqlQuery, new { @pulls = pulls, @user_id = userId, @date = date });
+            conn.Execute(sqlQuery, new { pulls, @user_id = userId, date });
 
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
                               "and level = (Select level From pulls.users Where user_id = @user_id)::text ;";
-            int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date });
+            int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, date });
 
             if (pulls < sumPullsFromProgram && sumPullsFromProgram > 0)
             {
@@ -133,16 +134,16 @@ namespace PullUpsDapper
             // 101022.2 тестировать метод + повторения DayResultPlus
 
             sqlQuery = @"UPDATE pulls.day_result Set pulls = pulls + @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
-            conn.Execute(sqlQuery, new { @pulls = pulls, @user_id = userId, @date = date });
+            conn.Execute(sqlQuery, new { pulls, @user_id = userId, date });
 
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
                               "and level = (Select level From pulls.users Where user_id = @user_id)::text ;";
-            int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date });
+            int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, date });
 
             sqlQuery = @"Select pulls From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id;";
 
-            int sumPullsFromResult = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date });
+            int sumPullsFromResult = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, date });
 
             if (sumPullsFromResult < sumPullsFromProgram && sumPullsFromProgram > 0)
             {
@@ -186,7 +187,7 @@ namespace PullUpsDapper
             string sqlQuery = "SELECT a.approach , a.pulls" +
                   " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.week = b.week " +
                   " WHERE a.level = @level::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
-            var dayProgram = conn.Query<UserDayProgram>(sqlQuery, new { @user_id = userId, @date = date, @level = lvl });
+            var dayProgram = conn.Query<UserDayProgram>(sqlQuery, new { @user_id = userId, date, @level = lvl });
 
             List<UserDayProgram> userDayProgram = new List<UserDayProgram>();
 
@@ -208,8 +209,8 @@ namespace PullUpsDapper
                   " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.week = b.week " +
                   " WHERE a.level = @level::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
 
-            int plan = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date, @level = lvl });
-            int fact = conn.ExecuteScalar<int>("SELECT pulls FROM  pulls.day_result WHERE day_result.user_id = @user_id and date = CAST(@date as Date);", new { @user_id = userId, @date = date });
+            int plan = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, date, @level = lvl });
+            int fact = conn.ExecuteScalar<int>("SELECT pulls FROM  pulls.day_result WHERE day_result.user_id = @user_id and date = CAST(@date as Date);", new { @user_id = userId, date });
 
             conn.Close();
             return (fact, plan);
@@ -232,24 +233,25 @@ namespace PullUpsDapper
                                 "on plan.week = fact.week";
 
                 var lookup = new Dictionary<int, PlanPulls>();
-                _ = conn.Query<PlanPulls, FactPulls, PlanPulls>(sqlQuery, (p, f) => {
+                _ = conn.Query<PlanPulls, FactPulls, PlanPulls>(sqlQuery, (p, f) =>
+                {
 
                     PlanPulls planPulls;
                     if (!lookup.TryGetValue(p.Week, out planPulls))
                     {
                         lookup.Add(p.Week, planPulls = p);
                     }
- 
+
                     if (planPulls.Facts == null)
                         planPulls.Facts = new List<FactPulls>();
                     planPulls.Facts.Add(f);
 
                     return planPulls;
-                    }, new { @user_id = userId, @level = lvl }, splitOn: "Id"
+                }, new { @user_id = userId, @level = lvl }, splitOn: "Id"
                  ).AsQueryable();
                 var resultList = lookup.Values;
 
-                List <ForUserReport> report = new List<ForUserReport>();
+                List<ForUserReport> report = new List<ForUserReport>();
 
                 foreach (var plan in resultList)
                 {

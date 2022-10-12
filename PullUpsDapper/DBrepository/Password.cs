@@ -1,5 +1,4 @@
-﻿
-namespace PullUpsDapper
+﻿namespace PullUpsDapper.DBrepository
 {
     internal class Password
     {

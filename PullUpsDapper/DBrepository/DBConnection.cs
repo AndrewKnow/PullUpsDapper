@@ -1,5 +1,4 @@
-﻿
-namespace PullUpsDapper
+﻿namespace PullUpsDapper.DBrepository
 {
     public static class DBConnection
     {

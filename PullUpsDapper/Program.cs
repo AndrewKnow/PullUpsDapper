@@ -6,6 +6,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using System.Text;
 using PullUpsDapper.Users;
+using PullUpsDapper.DBrepository;
 
 namespace PullUpsDapper
 {

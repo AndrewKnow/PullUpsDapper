@@ -1,9 +1,8 @@
 ﻿
-using PullUpsDapper.TrainingPrograms;
 using PullUpsDapper.LevelPrograms;
 using PullUpsDapper.DayResults;
 
-namespace PullUpsDapper
+namespace PullUpsDapper.TrainingPrograms
 {
     public class CreateProgram
     {
@@ -73,7 +72,7 @@ namespace PullUpsDapper
 
                     pulls = pullsLvl3;
                     LevelProgram.Add(new LevelProgram("Турникмен", i, j, j > 2 && j <= 5 ? pulls + 3 : pullsLvl3 + 2));
-                    
+
                     date = date.AddDays(1);
                 }
             }
