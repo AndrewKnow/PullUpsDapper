@@ -106,11 +106,11 @@ namespace PullUpsDapper.DBrepository
 
             if (pulls < sumPullsFromProgram && sumPullsFromProgram > 0)
             {
-                checkResult = "не доделал программу за сегодня (осталось 👉🏻 {sumPullsFromProgram - pulls})";
+                checkResult = $"не доделал программу за сегодня (осталось 👉🏻 {sumPullsFromProgram - pulls})";
             }
             else if (pulls > sumPullsFromProgram && sumPullsFromProgram > 0)
             {
-                checkResult = "перевыполнил программу за сегодня (сверх плана 🦾 {pulls - sumPullsFromProgram})";
+                checkResult = $"перевыполнил программу за сегодня (сверх плана 🦾 {pulls - sumPullsFromProgram})";
             }
             else if (sumPullsFromProgram > 0)
             {
