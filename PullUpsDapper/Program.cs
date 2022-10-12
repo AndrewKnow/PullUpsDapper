@@ -66,11 +66,11 @@ namespace PullUpsDapper
                     {
                         case "Удалить":
                             userRepository.DeleteUserProgram(User);
-                            await botClient.SendTextMessageAsync(callbackQuery.Message.Chat, "Программа удалена",
+                            await botClient.SendTextMessageAsync(callbackQuery.Message.Chat, "🤖 Программа удалена",
                                 cancellationToken: cancellationToken);
                             break;
                         case "Отмена":
-                            await botClient.SendTextMessageAsync(callbackQuery.Message.Chat, "Действие отменено",
+                            await botClient.SendTextMessageAsync(callbackQuery.Message.Chat, "🤖 Действие отменено",
                                 cancellationToken: cancellationToken);
                             break;
                     }
@@ -93,13 +93,13 @@ namespace PullUpsDapper
                             if (result >= 1 && result <= 4)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    $"Записал {result} повторения за сегодня, ты {checkResult}",
+                                    $"🤖 Записал {result} повторения за сегодня, ты {checkResult}",
                                     cancellationToken: cancellationToken);
                             }
                             else
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    $"Записал {result} повторений за сегодня, ты {checkResult}",
+                                    $"🤖 Записал {result} повторений за сегодня, ты {checkResult}",
                                     cancellationToken: cancellationToken);
                             }
 
@@ -108,43 +108,45 @@ namespace PullUpsDapper
                         else
                         {
                             await botClient.SendTextMessageAsync(message.Chat,
-                                "Введено не число, ввод данных отменён!",
+                                "🤖 Введено не число, ввод данных отменён!",
                                 cancellationToken: cancellationToken);
                             UserDayProgram.DayReport = false;
                         }
                     }
 
-                    // 101022.2 тестировать метод + повторения DayResultPlus
-                    if (message.Text.Substring(0, 1) == "+")
+                    if (message.Text != null)
                     {
-                        bool pullsCheck = int.TryParse(message.Text.Substring(1, message.Text.Length - 1), out int result);
-                        if (pullsCheck)
+                        if (message.Text.Substring(0, 1) == "+")
                         {
-                            if (level != null && count == 1)
+                            bool pullsCheck = int.TryParse(message.Text.Substring(1, message.Text.Length - 1), out int result);
+                            if (pullsCheck)
                             {
-                                await botClient.SendTextMessageAsync(message.Chat,
-                                    "Сохранение данных о выполненных повторениях...",
-                                    cancellationToken: cancellationToken);
+                                if (level != null && count == 1)
+                                {
+                                    await botClient.SendTextMessageAsync(message.Chat,
+                                        "🤖 Сохранение данных о выполненных повторениях...",
+                                        cancellationToken: cancellationToken);
 
-                                string checkResult = userRepository.DayResultPlus(userId, result);
+                                    string checkResult = userRepository.DayResultPlus(userId, result);
 
-                                if (result == 1)
-                                {
-                                    await botClient.SendTextMessageAsync(message.Chat,
-                                        $"Добавил {result} повторение к сегодняшнему результату, ты {checkResult}",
-                                        cancellationToken: cancellationToken);
-                                }
-                                else if (result >= 2 && result <= 4)
-                                {
-                                    await botClient.SendTextMessageAsync(message.Chat,
-                                        $"Добавил {result} повторения к сегодняшнему результату, ты {checkResult}",
-                                        cancellationToken: cancellationToken);
-                                }
-                                else
-                                {
-                                    await botClient.SendTextMessageAsync(message.Chat,
-                                        $"Записал {result} повторений к сегодняшнему результату, ты {checkResult}",
-                                        cancellationToken: cancellationToken);
+                                    if (result == 1)
+                                    {
+                                        await botClient.SendTextMessageAsync(message.Chat,
+                                            $"🤖 Добавил {result} повторение к сегодняшнему результату, ты {checkResult}",
+                                            cancellationToken: cancellationToken);
+                                    }
+                                    else if (result >= 2 && result <= 4)
+                                    {
+                                        await botClient.SendTextMessageAsync(message.Chat,
+                                            $"🤖 Добавил {result} повторения к сегодняшнему результату, ты {checkResult}",
+                                            cancellationToken: cancellationToken);
+                                    }
+                                    else
+                                    {
+                                        await botClient.SendTextMessageAsync(message.Chat,
+                                            $"🤖 Записал {result} повторений к сегодняшнему результату, ты {checkResult}",
+                                            cancellationToken: cancellationToken);
+                                    }
                                 }
                             }
                         }
@@ -156,7 +158,7 @@ namespace PullUpsDapper
                             if (level != null && count == 1 )
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    @$"{name}, твоя программа ""{level}"" можешь проверить свою программу тренировок и зписать результат"
+                                    @$"🤖 {name}, твоя программа ""{level}"" можешь проверить свою программу тренировок и зписать результат"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
                                 await RemoveReplyKeboard(botClient, message);
@@ -166,7 +168,7 @@ namespace PullUpsDapper
                             if (level == null && count == 1)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    @$"{name}, у тебя не выбрана программа тренировок"
+                                    @$"🤖 {name}, у тебя не выбрана программа тренировок"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
                                 await RemoveReplyKeboard(botClient, message);
@@ -180,7 +182,7 @@ namespace PullUpsDapper
                                 userRepository.CreateUser(user);
 
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    $"Привет {name}, завёл тебя в свою базу, выбери программу тренировок"
+                                    $"🤖 Привет {name}, завёл тебя в свою базу, выбери программу тренировок"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
                                 await RemoveReplyKeboard(botClient, message);
@@ -272,7 +274,7 @@ namespace PullUpsDapper
                             else
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                "Не создана программ тренировок!\nВыбирайте:",
+                                "🤖 Не создана программ тренировок!\nВыбирайте:",
                                 cancellationToken: cancellationToken);
                                 await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 2);
@@ -409,7 +411,7 @@ namespace PullUpsDapper
                             else
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                "Не создана программ тренировок!\nВыбирайте:",
+                                "🤖 Не создана программ тренировок!\nВыбирайте:",
                                 cancellationToken: cancellationToken);
                                 await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 2);
