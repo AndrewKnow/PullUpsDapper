@@ -157,21 +157,25 @@ namespace PullUpsDapper
                         case "/start":
                             if (level != null && count == 1 )
                             {
+                                await RemoveReplyKeboard(botClient, message);
                                 await botClient.SendTextMessageAsync(message.Chat,
-                                    @$"🤖 {name}, твоя программа ""{level}"" можешь проверить свою программу тренировок и зписать результат"
+                                    @$"🤖 {name}, твоя программа ""{level}"" можешь проверить свою программу тренировок и зписать результат. " +
+                                    @"Для ввода рузультата можно выбрать кнопку ""✔️Отчёт о выполнении за сегодня"" и записать общее количество выполнненых повторенией" + 
+                                    @" или набери ""+"" и количество повторений, тогда резултат будет сумироваться."
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
-                                await RemoveReplyKeboard(botClient, message);
+                                
                                 await SendReplyKeboard(botClient, message, 3);
                             }
 
                             if (level == null && count == 1)
                             {
+                                await RemoveReplyKeboard(botClient, message);
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     @$"🤖 {name}, у тебя не выбрана программа тренировок"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
-                                await RemoveReplyKeboard(botClient, message);
+                                
                                 await SendReplyKeboard(botClient, message, 2);
                             }
                             else if (level == null && count == 0)
@@ -180,12 +184,11 @@ namespace PullUpsDapper
                                 user.IdUser = userId;
                                 user.Name = name;
                                 userRepository.CreateUser(user);
-
+                                await RemoveReplyKeboard(botClient, message);
                                 await botClient.SendTextMessageAsync(message.Chat,
                                     $"🤖 Привет {name}, завёл тебя в свою базу, выбери программу тренировок"
                                     + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                     cancellationToken: cancellationToken);
-                                await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 2);
                             }
                             break;
@@ -214,10 +217,10 @@ namespace PullUpsDapper
                             }
                             else
                             {
+                                await RemoveReplyKeboard(botClient, message);
                                 await botClient.SendTextMessageAsync(message.Chat,
                                 "Не создана программ тренировок!\nВыбирайте:",
                                 cancellationToken: cancellationToken);
-                                await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 2);
                             }
                             break;
@@ -273,10 +276,10 @@ namespace PullUpsDapper
                             }
                             else
                             {
+                                await RemoveReplyKeboard(botClient, message);
                                 await botClient.SendTextMessageAsync(message.Chat,
                                 "🤖 Не создана программ тренировок!\nВыбирайте:",
                                 cancellationToken: cancellationToken);
-                                await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 2);
                             }
                             break;
@@ -312,12 +315,11 @@ namespace PullUpsDapper
 
                             (level, count) = userRepository.GetUsersId(userId);
                             userRepository.CreateTrainingProgram(level, userId);
-                            
+                            await RemoveReplyKeboard(botClient, message);
                             await botClient.SendTextMessageAsync(message.Chat,
                                 @$"{name}, твоя программа ""{level}"" начинай тренироваться и зписывай результат"
                                 + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                 cancellationToken: cancellationToken);
-                            await RemoveReplyKeboard(botClient, message);
                             await SendReplyKeboard(botClient, message, 3);
                             break;
 
@@ -327,11 +329,11 @@ namespace PullUpsDapper
                             (level, count) = userRepository.GetUsersId(userId);
                             userRepository.CreateTrainingProgram(level, userId);
 
+                            await RemoveReplyKeboard(botClient, message);
                             await botClient.SendTextMessageAsync(message.Chat,
                                 @$"{name}, твоя программа ""{level}"" начинай тренироваться и зписывай результат"
                                 + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                 cancellationToken: cancellationToken);
-                            await RemoveReplyKeboard(botClient, message);
                             await SendReplyKeboard(botClient, message, 3);
                             break;
 
@@ -340,12 +342,11 @@ namespace PullUpsDapper
 
                             (level, count) = userRepository.GetUsersId(userId);
                             userRepository.CreateTrainingProgram(level, userId);
-
+                            await RemoveReplyKeboard(botClient, message);
                             await botClient.SendTextMessageAsync(message.Chat,
                                 @$"{name}, твоя программа ""{level}"" начинай тренироваться и зписывай результат"
                                 + char.ConvertFromUtf32(0x1F4AA) + char.ConvertFromUtf32(0x1F609),
                                 cancellationToken: cancellationToken);
-                            await RemoveReplyKeboard(botClient, message);
                             await SendReplyKeboard(botClient, message, 3);
                             break;
 
@@ -410,10 +411,10 @@ namespace PullUpsDapper
                             }
                             else
                             {
+                                await RemoveReplyKeboard(botClient, message);
                                 await botClient.SendTextMessageAsync(message.Chat,
                                 "🤖 Не создана программ тренировок!\nВыбирайте:",
                                 cancellationToken: cancellationToken);
-                                await RemoveReplyKeboard(botClient, message);
                                 await SendReplyKeboard(botClient, message, 2);
                             }
 
@@ -490,12 +491,12 @@ namespace PullUpsDapper
                     break;
             }
             return await botClient.SendTextMessageAsync(chatId: message.Chat.Id,
-                text: "🤖 загружаю информацию...", replyMarkup: replyKeyboardMarkup);
+                text: "🤖 готов", replyMarkup: replyKeyboardMarkup);
         }
 
         static async Task<Message> RemoveReplyKeboard(ITelegramBotClient botClient, Message message)
         {
-            return await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "🤖 работаю"
+            return await botClient.SendTextMessageAsync(chatId: message.Chat.Id, text: "🤖 настраиваюсь ..."
                          , replyMarkup: new ReplyKeyboardRemove());
         }
     }
