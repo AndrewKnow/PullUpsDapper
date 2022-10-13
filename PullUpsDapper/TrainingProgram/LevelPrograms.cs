@@ -1,5 +1,5 @@
 ﻿
-namespace PullUpsDapper.LevelPrograms
+namespace PullUpsDapper.TrainingProgram
 {
     public class LevelProgram
     {

@@ -2,9 +2,7 @@
 using Npgsql;
 using Dapper;
 using PullUpsDapper.Users;
-using PullUpsDapper.DayResults;
-using PullUpsDapper.LevelPrograms;
-using PullUpsDapper.TrainingPrograms;
+using PullUpsDapper.TrainingProgram;
 
 namespace PullUpsDapper.DBrepository
 {

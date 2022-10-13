@@ -1,5 +1,5 @@
 ﻿
-namespace PullUpsDapper.DayResults
+namespace PullUpsDapper.TrainingProgram
 {
     public class DayResult
     {

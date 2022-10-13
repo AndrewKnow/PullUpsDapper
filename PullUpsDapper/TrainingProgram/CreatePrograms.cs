@@ -1,8 +1,5 @@
 ﻿
-using PullUpsDapper.LevelPrograms;
-using PullUpsDapper.DayResults;
-
-namespace PullUpsDapper.TrainingPrograms
+namespace PullUpsDapper.TrainingProgram
 {
     public class CreateProgram
     {
