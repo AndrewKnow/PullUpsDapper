@@ -17,7 +17,7 @@ namespace PullUpsDapper.TrainingProgram
             for (int i = 1; i <= 30; i++) // неделя
             {
                 pulls++;
-                for (int j = 1; j <= 6; j++) // подход
+                for (int j = 1; j <= 7; j++) // дни недели
                 {
                     DayResult.Add(new DayResult(userId, i, date, 0));
                     switch (lvl) // уровень
@@ -59,7 +59,7 @@ namespace PullUpsDapper.TrainingProgram
                     pullsLvl3++;
                 }
 
-                for (int j = 1; j <= 6; j++) // подход
+                for (int j = 1; j <= 6; j++) 
                 {
                     pulls = pullsLvl1;
                     LevelProgram.Add(new LevelProgram("Новичок", i, j, j > 2 && j <= 3 ? pulls + 1 : pullsLvl1));
