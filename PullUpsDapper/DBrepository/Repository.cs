@@ -3,6 +3,7 @@ using Npgsql;
 using Dapper;
 using PullUpsDapper.Users;
 using PullUpsDapper.TrainingProgram;
+using Microsoft.VisualBasic;
 
 namespace PullUpsDapper.DBrepository
 {
@@ -95,12 +96,12 @@ namespace PullUpsDapper.DBrepository
             string sqlQuery;
 
             sqlQuery = @"UPDATE pulls.day_result Set pulls = @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
-            conn.Execute(sqlQuery, new { pulls, @user_id = userId, date });
+            conn.Execute(sqlQuery, new { pulls, @user_id = userId, @date = date });
 
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
                               "and level = (Select level From pulls.users Where user_id = @user_id)::text ;";
-            int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, date });
+            int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date });
 
             if (pulls < sumPullsFromProgram && sumPullsFromProgram > 0)
             {
@@ -137,11 +138,11 @@ namespace PullUpsDapper.DBrepository
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
                               "and level = (Select level From pulls.users Where user_id = @user_id)::text ;";
-            int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, date });
+            int sumPullsFromProgram = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date });
 
             sqlQuery = @"Select pulls From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id;";
 
-            int sumPullsFromResult = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, date });
+            int sumPullsFromResult = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date });
 
             if (sumPullsFromResult < sumPullsFromProgram && sumPullsFromProgram > 0)
             {
@@ -185,7 +186,7 @@ namespace PullUpsDapper.DBrepository
             string sqlQuery = "SELECT a.approach , a.pulls" +
                   " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.week = b.week " +
                   " WHERE a.level = @level::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
-            var dayProgram = conn.Query<UserDayProgram>(sqlQuery, new { @user_id = userId, date, @level = lvl });
+            var dayProgram = conn.Query<UserDayProgram>(sqlQuery, new { @user_id = userId, @date = date, @level = lvl });
 
             List<UserDayProgram> userDayProgram = new List<UserDayProgram>();
 
@@ -208,7 +209,7 @@ namespace PullUpsDapper.DBrepository
                   " WHERE a.level = @level::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
 
             int plan = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, date, @level = lvl });
-            int fact = conn.ExecuteScalar<int>("SELECT pulls FROM  pulls.day_result WHERE day_result.user_id = @user_id and date = CAST(@date as Date);", new { @user_id = userId, date });
+            int fact = conn.ExecuteScalar<int>("SELECT pulls FROM  pulls.day_result WHERE day_result.user_id = @user_id and date = CAST(@date as Date);", new { @user_id = userId, @date = date });
 
             conn.Close();
             return (fact, plan);
