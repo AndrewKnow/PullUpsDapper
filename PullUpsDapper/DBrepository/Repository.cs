@@ -96,7 +96,7 @@ namespace PullUpsDapper.DBrepository
             string sqlQuery;
 
             sqlQuery = @"UPDATE pulls.day_result Set pulls = @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
-            conn.Execute(sqlQuery, new { pulls, @user_id = userId, @date = date });
+            conn.Execute(sqlQuery, new { @pulls = pulls, @user_id = userId, @date = date });
 
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
