@@ -1,10 +1,11 @@
 ﻿
+using System.Collections;
+
 namespace PullUpsDapper.Users
 {
-    public class UserDayProgram
+    public class UserDayProgram /*: IEnumerable*/
     {
         public static bool DayReport { get; set; }
-        //public static bool DayReportPlus { get; set; }
         public int Approach { get; set; }
         public int Pulls { get; set; }
 

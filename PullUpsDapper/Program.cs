@@ -228,7 +228,8 @@ namespace PullUpsDapper
                         case "💪Моя задача на сегодня":
                             if (level != null && count == 1)
                             {
-                                var userDayProgram = userRepository.DayStatus(userId, level);
+                                var userDayProgramss = await userRepository.DayStatus(userId, level);
+
                                 await botClient.SendTextMessageAsync(message.Chat,
                                  $"Дата: {DateTime.Today.ToShortDateString()}",
                                 cancellationToken: cancellationToken);
@@ -238,7 +239,7 @@ namespace PullUpsDapper
 
                                 Func<int, string> whiteSpace = x => new string('\t', x);
 
-                                foreach (var item in userDayProgram)
+                                foreach (var item in userDayProgramss)
                                 {
                                     if (i == 0)
                                     {

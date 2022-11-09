@@ -4,6 +4,7 @@ using Dapper;
 using PullUpsDapper.Users;
 using PullUpsDapper.TrainingProgram;
 using Microsoft.VisualBasic;
+using System.Collections;
 
 namespace PullUpsDapper.DBrepository
 {
@@ -181,7 +182,7 @@ namespace PullUpsDapper.DBrepository
             conn.Close();
             return response;
         }
-
+        //public async Task<IEnumerable<UserDayProgram>> DayStatus(long userId, string lvl)
         public async Task<List<UserDayProgram>> DayStatus(long userId, string lvl)
         {
             ConnString = DBConnection.ConnectionString();
@@ -193,8 +194,8 @@ namespace PullUpsDapper.DBrepository
                   " WHERE a.level = @level::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
             var dayProgram = await conn.QueryAsync<UserDayProgram>(sqlQuery, new { @user_id = userId, @date = date, @level = lvl });
 
-            List<UserDayProgram> userDayProgram = new List<UserDayProgram>();
-
+            List<UserDayProgram> userDayProgram = new();
+     
             foreach (var item in dayProgram)
             {
                 userDayProgram.Add(new UserDayProgram(item.Approach, item.Pulls));
