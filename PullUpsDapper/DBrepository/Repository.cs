@@ -17,7 +17,7 @@ namespace PullUpsDapper.DBrepository
         List<UserDayProgram> DayStatus(long userId, string lvl);
         string DayResult(long userId, int pulls);
         string DayResultPlus(long userId, int pulls);
-        void CreateLevelProgram();
+        public Task<LevelProgram> CreateLevelProgram();
         IEnumerable<ForUserReport> UserReport(long userId, string lvl);
         void DeleteUserProgram(long userId);
         (int fact, int plan) FactPlanToday(long userId, string lvl);
@@ -160,13 +160,15 @@ namespace PullUpsDapper.DBrepository
             return checkResult;
         }
 
-        public void CreateLevelProgram() // Функция администратора
+        public async Task<LevelProgram> CreateLevelProgram() // Функция администратора
         {
             ConnString = DBConnection.ConnectionString();
             var result = CreateProgram.CreareProgramLevel();
             using var conn = new NpgsqlConnection(ConnString);
 
-            conn.Execute("DELETE From pulls.lvl_user_program");
+            var response = await conn.QueryFirstOrDefaultAsync<LevelProgram>(@"DELETE From pulls.lvl_user_program");
+            //await conn.OpenAsync();
+            //conn.Execute("DELETE From pulls.lvl_user_program");
 
             for (int i = 0; i < result.Count; i++)
             {
@@ -174,7 +176,9 @@ namespace PullUpsDapper.DBrepository
                 var sqlQuery = @"INSERT INTO pulls.lvl_user_program (level, week, approach, pulls) VALUES (@level, @week, @approach, @pulls)";
                 conn.Execute(sqlQuery, new { @level = res.Level, @week = res.Week, @approach = res.Approach, @pulls = res.Pulls });
             }
+
             conn.Close();
+            return response;
         }
 
         public List<UserDayProgram> DayStatus(long userId, string lvl)
@@ -208,7 +212,7 @@ namespace PullUpsDapper.DBrepository
                   " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.week = b.week " +
                   " WHERE a.level = @level::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
 
-            int plan = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, date, @level = lvl });
+            int plan = conn.ExecuteScalar<int>(sqlQuery, new { @user_id = userId, @date = date, @level = lvl });
             int fact = conn.ExecuteScalar<int>("SELECT pulls FROM  pulls.day_result WHERE day_result.user_id = @user_id and date = CAST(@date as Date);", new { @user_id = userId, @date = date });
 
             conn.Close();
