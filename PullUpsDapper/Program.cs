@@ -87,7 +87,7 @@ namespace PullUpsDapper
                         bool pullsCheck = int.TryParse(message.Text, out int result);
                         if (pullsCheck)
                         {
-                            string checkResult = userRepository.DayResult(userId, result);
+                            string checkResult = await userRepository.DayResult(userId, result);
 
                             
                             if (result >= 1 && result <= 4)
@@ -127,7 +127,7 @@ namespace PullUpsDapper
                                         "🤖 Сохранение данных о выполненных повторениях...",
                                         cancellationToken: cancellationToken);
 
-                                    string checkResult = userRepository.DayResultPlus(userId, result);
+                                    string checkResult = await userRepository.DayResultPlus(userId, result);
 
                                     if (result == 1)
                                     {

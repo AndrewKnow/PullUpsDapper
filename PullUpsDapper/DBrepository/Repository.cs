@@ -15,8 +15,8 @@ namespace PullUpsDapper.DBrepository
         void UpdateUser(string lvl, long userId);
         void CreateTrainingProgram(string lvl, long userId);
         Task<List<UserDayProgram>> DayStatus(long userId, string lvl);
-        string DayResult(long userId, int pulls);
-        string DayResultPlus(long userId, int pulls);
+        Task<string> DayResult(long userId, int pulls);
+        Task<string> DayResultPlus(long userId, int pulls);
         Task<LevelProgram> CreateLevelProgram();
         IEnumerable<ForUserReport> UserReport(long userId, string lvl);
         void DeleteUserProgram(long userId);
@@ -87,7 +87,7 @@ namespace PullUpsDapper.DBrepository
             conn.Close();
         }
 
-        public string DayResult(long userId, int pulls)
+        public async Task<string> DayResult(long userId, int pulls)
         {
             var date = DateTime.Now;
             string checkResult = "";
@@ -96,7 +96,8 @@ namespace PullUpsDapper.DBrepository
             string sqlQuery;
 
             sqlQuery = @"UPDATE pulls.day_result Set pulls = @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
-            conn.Execute(sqlQuery, new { @pulls = pulls, @user_id = userId, @date = date });
+            // conn.Execute(sqlQuery, new { @pulls = pulls, @user_id = userId, @date = date });
+            var response = await conn.QueryFirstOrDefaultAsync<DayResult>(sqlQuery, new { pulls, @user_id = userId, date });
 
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
@@ -121,9 +122,8 @@ namespace PullUpsDapper.DBrepository
 
             return checkResult;
         }
-        public string DayResultPlus(long userId, int pulls)
+        public async Task<string> DayResultPlus(long userId, int pulls)
         {
-
             var date = DateTime.Now;
             string checkResult = "";
             ConnString = DBConnection.ConnectionString();
@@ -133,7 +133,9 @@ namespace PullUpsDapper.DBrepository
             // 101022.2 тестировать метод + повторения DayResultPlus
 
             sqlQuery = @"UPDATE pulls.day_result Set pulls = pulls + @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
-            conn.Execute(sqlQuery, new { pulls, @user_id = userId, date });
+            // conn.Execute(sqlQuery, new { pulls, @user_id = userId, date });
+
+            var response = await conn.QueryFirstOrDefaultAsync<DayResult>(sqlQuery, new { pulls, @user_id = userId, date });
 
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
