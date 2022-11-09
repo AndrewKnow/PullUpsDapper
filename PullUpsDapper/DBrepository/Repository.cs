@@ -14,7 +14,7 @@ namespace PullUpsDapper.DBrepository
         (string lvl, int count) GetUsersId(long userId);
         void UpdateUser(string lvl, long userId);
         void CreateTrainingProgram(string lvl, long userId);
-        List<UserDayProgram> DayStatus(long userId, string lvl);
+        public Task<List<UserDayProgram>> DayStatus(long userId, string lvl);
         string DayResult(long userId, int pulls);
         string DayResultPlus(long userId, int pulls);
         public Task<LevelProgram> CreateLevelProgram();
@@ -182,7 +182,7 @@ namespace PullUpsDapper.DBrepository
             return response;
         }
 
-        public List<UserDayProgram> DayStatus(long userId, string lvl)
+        public async Task<List<UserDayProgram>> DayStatus(long userId, string lvl)
         {
             ConnString = DBConnection.ConnectionString();
             var date = DateTime.Now;
@@ -191,7 +191,7 @@ namespace PullUpsDapper.DBrepository
             string sqlQuery = "SELECT a.approach , a.pulls" +
                   " FROM  pulls.lvl_user_program a LEFT JOIN pulls.day_result b ON a.week = b.week " +
                   " WHERE a.level = @level::text  and b.date = CAST(@date as Date) and user_id = @user_id;";
-            var dayProgram = conn.Query<UserDayProgram>(sqlQuery, new { @user_id = userId, @date = date, @level = lvl });
+            var dayProgram = await conn.QueryAsync<UserDayProgram>(sqlQuery, new { @user_id = userId, @date = date, @level = lvl });
 
             List<UserDayProgram> userDayProgram = new List<UserDayProgram>();
 
