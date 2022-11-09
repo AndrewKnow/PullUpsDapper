@@ -97,7 +97,7 @@ namespace PullUpsDapper.DBrepository
             string sqlQuery;
 
             sqlQuery = @"UPDATE pulls.day_result Set pulls = @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
-            conn.QueryFirstOrDefaultAsync<DayResult>(sqlQuery, new { pulls, @user_id = userId, date });
+            conn.QueryFirstOrDefault<DayResult>(sqlQuery, new { pulls, @user_id = userId, date });
 
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
@@ -133,7 +133,7 @@ namespace PullUpsDapper.DBrepository
             // 101022.2 тестировать метод + повторения DayResultPlus
 
             sqlQuery = @"UPDATE pulls.day_result Set pulls = pulls + @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
-            conn.QueryFirstOrDefaultAsync<DayResult>(sqlQuery, new { pulls, @user_id = userId, date });
+            conn.QueryFirstOrDefault<DayResult>(sqlQuery, new { pulls, @user_id = userId, date });
 
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
