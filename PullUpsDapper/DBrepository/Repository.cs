@@ -15,9 +15,9 @@ namespace PullUpsDapper.DBrepository
         void UpdateUser(string lvl, long userId);
         void CreateTrainingProgram(string lvl, long userId);
         Task<List<UserDayProgram>> DayStatus(long userId, string lvl);
-        Task<string> DayResult(long userId, int pulls);
-        Task<string> DayResultPlus(long userId, int pulls);
-        Task<LevelProgram> CreateLevelProgram();
+        string DayResult(long userId, int pulls);
+        string DayResultPlus(long userId, int pulls);
+        void CreateLevelProgram();
         IEnumerable<ForUserReport> UserReport(long userId, string lvl);
         void DeleteUserProgram(long userId);
         (int fact, int plan) FactPlanToday(long userId, string lvl);
@@ -59,7 +59,7 @@ namespace PullUpsDapper.DBrepository
             ConnString = DBConnection.ConnectionString();
             using var conn = new NpgsqlConnection(ConnString);
             var sqlQuery = @"INSERT INTO pulls.users (user_id, name) VALUES (@user_id, @name)";
-            conn.Execute(sqlQuery, new { @user_id = user.IdUser, @name = user.Name });
+            conn.QueryFirstOrDefault<User>(sqlQuery, new { @user_id = user.IdUser, @name = user.Name });
             conn.Close();
         }
 
@@ -69,7 +69,7 @@ namespace PullUpsDapper.DBrepository
             ConnString = DBConnection.ConnectionString();
             using var conn = new NpgsqlConnection(ConnString);
             var sqlQuery = @"UPDATE pulls.users SET level = '" + lvl + "' WHERE @users.user_id = @user_id;";
-            conn.Execute(sqlQuery, new { lvl, @user_id = userId });
+            conn.QueryFirstOrDefault<User>(sqlQuery, new { lvl, @user_id = userId });
             conn.Close();
         }
 
@@ -82,12 +82,13 @@ namespace PullUpsDapper.DBrepository
             {
                 DayResult res = result[i];
                 var sqlQuery = @"INSERT INTO pulls.day_result (user_id, week, date, pulls) VALUES (@user_id, @week, @date, @pulls)";
-                conn.Execute(sqlQuery, new { @user_id = res.Id, @week = res.Week, @date = res.Date, @pulls = 0 });
+                // conn.Execute(sqlQuery, new { @user_id = res.Id, @week = res.Week, @date = res.Date, @pulls = 0 });
+                conn.QueryFirstOrDefault<DayResult>(sqlQuery, new { @user_id = res.Id, @week = res.Week, @date = res.Date, @pulls = 0 });
             }
             conn.Close();
         }
 
-        public async Task<string> DayResult(long userId, int pulls)
+        public string DayResult(long userId, int pulls)
         {
             var date = DateTime.Now;
             string checkResult = "";
@@ -96,8 +97,7 @@ namespace PullUpsDapper.DBrepository
             string sqlQuery;
 
             sqlQuery = @"UPDATE pulls.day_result Set pulls = @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
-            // conn.Execute(sqlQuery, new { @pulls = pulls, @user_id = userId, @date = date });
-            var response = await conn.QueryFirstOrDefaultAsync<DayResult>(sqlQuery, new { pulls, @user_id = userId, date });
+            conn.QueryFirstOrDefaultAsync<DayResult>(sqlQuery, new { pulls, @user_id = userId, date });
 
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
@@ -122,7 +122,7 @@ namespace PullUpsDapper.DBrepository
 
             return checkResult;
         }
-        public async Task<string> DayResultPlus(long userId, int pulls)
+        public string DayResultPlus(long userId, int pulls)
         {
             var date = DateTime.Now;
             string checkResult = "";
@@ -133,9 +133,7 @@ namespace PullUpsDapper.DBrepository
             // 101022.2 тестировать метод + повторения DayResultPlus
 
             sqlQuery = @"UPDATE pulls.day_result Set pulls = pulls + @pulls WHERE day_result.user_id = @user_id and day_result.date = CAST(@date as Date);";
-            // conn.Execute(sqlQuery, new { pulls, @user_id = userId, date });
-
-            var response = await conn.QueryFirstOrDefaultAsync<DayResult>(sqlQuery, new { pulls, @user_id = userId, date });
+            conn.QueryFirstOrDefaultAsync<DayResult>(sqlQuery, new { pulls, @user_id = userId, date });
 
             sqlQuery = @"Select sum(pulls) From pulls.lvl_user_program WHERE " +
                               "week = (Select week From pulls.day_result WHERE date = CAST(@date as Date) and user_id = @user_id) " +
@@ -162,13 +160,13 @@ namespace PullUpsDapper.DBrepository
             return checkResult;
         }
 
-        public async Task<LevelProgram> CreateLevelProgram() // Функция администратора
+        public void CreateLevelProgram() // Функция администратора
         {
             ConnString = DBConnection.ConnectionString();
             var result = CreateProgram.CreareProgramLevel();
             using var conn = new NpgsqlConnection(ConnString);
 
-            var response = await conn.QueryFirstOrDefaultAsync<LevelProgram>(@"DELETE From pulls.lvl_user_program");
+            conn.QueryFirstOrDefault<LevelProgram>(@"DELETE From pulls.lvl_user_program");
             //await conn.OpenAsync();
             //conn.Execute("DELETE From pulls.lvl_user_program");
 
@@ -177,11 +175,10 @@ namespace PullUpsDapper.DBrepository
                 LevelProgram res = result[i];
                 var sqlQuery = @"INSERT INTO pulls.lvl_user_program (level, week, approach, pulls) VALUES (@level, @week, @approach, @pulls)";
                 //conn.Execute(sqlQuery, new { @level = res.Level, @week = res.Week, @approach = res.Approach, @pulls = res.Pulls });
-                var responseInsert = await conn.QueryFirstOrDefaultAsync<LevelProgram>(sqlQuery, new { @level = res.Level, @week = res.Week, @approach = res.Approach, @pulls = res.Pulls });
+                conn.QueryFirstOrDefault<LevelProgram>(sqlQuery, new { @level = res.Level, @week = res.Week, @approach = res.Approach, @pulls = res.Pulls });
             }
 
             conn.Close();
-            return response;
         }
 
         public async Task<List<UserDayProgram>> DayStatus(long userId, string lvl)
@@ -280,7 +277,10 @@ namespace PullUpsDapper.DBrepository
         {
             ConnString = DBConnection.ConnectionString();
             using var conn = new NpgsqlConnection(ConnString);
-            conn.Execute(@"DELETE From pulls.day_result Where day_result.user_id = @user_id;", new { @user_id = userId });
+            // conn.Execute(@"DELETE From pulls.day_result Where day_result.user_id = @user_id;", new { @user_id = userId });
+            conn.QueryFirstOrDefault<DayResult>(@"DELETE From pulls.day_result Where day_result.user_id = @user_id;", new { @user_id = userId });
+
+
             conn.Execute(@"UPDATE pulls.users SET level = null Where users.user_id = @user_id;", new { @user_id = userId });
             conn.Close();
         }

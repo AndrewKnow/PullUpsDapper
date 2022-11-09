@@ -87,9 +87,11 @@ namespace PullUpsDapper
                         bool pullsCheck = int.TryParse(message.Text, out int result);
                         if (pullsCheck)
                         {
-                            string checkResult = await userRepository.DayResult(userId, result);
+                            // Для асинхронного вызова метода
+                            // public async Task<string> DayResult(long userId, int pulls)
+                            // string checkResult = await userRepository.DayResult(userId, result); 
+                            string checkResult = userRepository.DayResult(userId, result);
 
-                            
                             if (result >= 1 && result <= 4)
                             {
                                 await botClient.SendTextMessageAsync(message.Chat,
@@ -127,7 +129,7 @@ namespace PullUpsDapper
                                         "🤖 Сохранение данных о выполненных повторениях...",
                                         cancellationToken: cancellationToken);
 
-                                    string checkResult = await userRepository.DayResultPlus(userId, result);
+                                    string checkResult = userRepository.DayResultPlus(userId, result);
 
                                     if (result == 1)
                                     {
