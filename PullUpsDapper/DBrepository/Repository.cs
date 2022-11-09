@@ -174,7 +174,8 @@ namespace PullUpsDapper.DBrepository
             {
                 LevelProgram res = result[i];
                 var sqlQuery = @"INSERT INTO pulls.lvl_user_program (level, week, approach, pulls) VALUES (@level, @week, @approach, @pulls)";
-                conn.Execute(sqlQuery, new { @level = res.Level, @week = res.Week, @approach = res.Approach, @pulls = res.Pulls });
+                //conn.Execute(sqlQuery, new { @level = res.Level, @week = res.Week, @approach = res.Approach, @pulls = res.Pulls });
+                var responseInsert = await conn.QueryFirstOrDefaultAsync<LevelProgram>(sqlQuery, new { @level = res.Level, @week = res.Week, @approach = res.Approach, @pulls = res.Pulls });
             }
 
             conn.Close();
